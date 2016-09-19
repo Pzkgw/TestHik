@@ -1,0 +1,7 @@
+/TestHik/obj
+/TestHik/bin/Debug/*.exe
+/TestHik/bin/x86/Debug/*.exe
+/TestHik/bin/Debug/*.pdb
+/TestHik/bin/x86/Debug/*.pdb
+/TestHik/bin/Debug/*.manifest
+/TestHik/bin/x86/Debug/*.manifest
