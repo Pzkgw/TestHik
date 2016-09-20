@@ -44,8 +44,8 @@ namespace TestHik
         public int nPlayerPort = -1;
 
         public bool bDebugAccessGranted = true;
-        private string sDebugFileName = string.Empty;
-        private string sDebugPath = string.Empty;
+        public string sDebugFileName = string.Empty;
+        public string sDebugPath = string.Empty;
         public readonly object debugLock = new object(); // lock pt acces unic la resursa de scriere in fisierul de salvare streaming
 
         public bool bSavingStream = false;
@@ -186,13 +186,19 @@ namespace TestHik
         private static extern int PlayM4_GetPort(ref int nPort);
 
         [DllImport("PlayCtrl.dll")]
+        private static extern uint PlayM4_GetCurrentFrameNum(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_SetStreamOpenMode(int nPort, int nMode);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_OpenStream(int nPort, out byte pFileHeadBuf, int nSize, int nBufPoolSize);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_OpenStreamEx(int nPort, out byte pFileHeadBuf, int nSize, int nBufPoolSize);
+        private static extern bool PlayM4_OpenStreamEx(int nPort, out byte pFileHeadBuf, uint nSize, uint nBufPoolSize);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_CloseStreamEx(int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_Play(int nPort, IntPtr hWnd);
@@ -213,7 +219,13 @@ namespace TestHik
         private static extern int PlayM4_SetDisplayBuf(int nPort, int nNum);// the number of images to be buffered
 
         [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_SetCurrentFrameNum(int nPort, uint nFrameNum);
+
+        [DllImport("PlayCtrl.dll")]
         private unsafe static extern int PlayM4_InputData(int nPort, byte* pBuf, int nSize);
+
+        [DllImport("PlayCtrl.dll")]
+        private unsafe static extern bool PlayM4_InputVideoData(int nPort, byte* pBuf, uint nSize);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_CloseStream(int nPort);
@@ -619,14 +631,14 @@ namespace TestHik
             }
             else
             {
-                BeginInvoke(new MyDebugInfo(DebugInfo), "Already closed");
+                //BeginInvoke(new MyDebugInfo(DebugInfo), "Already closed");
             }
             pictureBox1.Refresh();
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            SetReplay(m_rep_canal, 2);
+            SetReplay(m_rep_canal, false);
             CloseVideo();
         }
 
@@ -828,7 +840,7 @@ namespace TestHik
                             {
                                 // Transmit player-ului informatia bruta (nedecodata), iar acesta va trimite periodic, prin callback-ul <DisplayCallBack>, 
                                 // cate un buffer pt un frame YUV, imediat ce o imagine va fi compusa din aceste franturi de informatii brute.
-                                PlayM4_InputData(nPlayerPort, pb, (int)dwBufSize);
+                                PlayM4_InputData(nPlayerPort, pb, dwBufSize);
                             }
                         }
                     }
