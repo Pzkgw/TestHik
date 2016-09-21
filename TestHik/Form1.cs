@@ -195,7 +195,7 @@ namespace TestHik
         private static extern int PlayM4_OpenStream(int nPort, out byte pFileHeadBuf, int nSize, int nBufPoolSize);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern bool PlayM4_OpenStreamEx(int nPort, out byte pFileHeadBuf, uint nSize, uint nBufPoolSize);
+        private static extern bool PlayM4_OpenStreamEx(int nPort, ref byte pFileHeadBuf, uint nSize, uint nBufPoolSize);
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_CloseStreamEx(int nPort);
@@ -207,10 +207,22 @@ namespace TestHik
         private static extern int PlayM4_Fast(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_OneByOne(int nPort);
+        private static extern bool PlayM4_OneByOne(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_OneByOneBack(int nPort);
+        private static extern bool PlayM4_OneByOneBack(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_SetPlayPos(int nPort, float fRelativePos);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern float PlayM4_GetPlayPos(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_SetPlayedTimeEx(int nPort, uint nTime);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern uint PlayM4_GetPlayedTimeEx(int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_SetDisplayCallBack(int nPort, fDisplayCallBack_Hik pProc);
@@ -222,7 +234,7 @@ namespace TestHik
         private static extern bool PlayM4_SetCurrentFrameNum(int nPort, uint nFrameNum);
 
         [DllImport("PlayCtrl.dll")]
-        private unsafe static extern int PlayM4_InputData(int nPort, byte* pBuf, int nSize);
+        private unsafe static extern bool PlayM4_InputData(int nPort, byte* pBuf, uint nSize);
 
         [DllImport("PlayCtrl.dll")]
         private unsafe static extern bool PlayM4_InputVideoData(int nPort, byte* pBuf, uint nSize);
@@ -840,7 +852,7 @@ namespace TestHik
                             {
                                 // Transmit player-ului informatia bruta (nedecodata), iar acesta va trimite periodic, prin callback-ul <DisplayCallBack>, 
                                 // cate un buffer pt un frame YUV, imediat ce o imagine va fi compusa din aceste franturi de informatii brute.
-                                PlayM4_InputData(nPlayerPort, pb, dwBufSize);
+                                PlayM4_InputData(nPlayerPort, pb, (uint)dwBufSize);
                             }
                         }
                     }

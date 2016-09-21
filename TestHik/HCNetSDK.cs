@@ -4447,8 +4447,19 @@ namespace TestHik
             public byte[] byRes;
         };
 
-
         [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct NET_DVR_CERT_PARAM
+        {
+            public uint dwSize;
+            public uint wCertFunc;
+            public uint wCertType;
+            public byte byFileType;
+            [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 35, ArraySubType = UnmanagedType.U1)]
+            public byte[] byRes;
+        }
+
+
+    [StructLayoutAttribute(LayoutKind.Sequential)]
         public struct NET_DVR_POINT_FRAME
         {
             public int xTop;
@@ -4946,13 +4957,22 @@ namespace TestHik
         [DllImport("HCNetSDK.dll")]
         public static extern void NET_DVR_ReleaseG722Encoder(IntPtr pEncodeHandle);
 
-
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_ClickKey(int lUserID, int lKeyIndex);
 
+        [DllImport("HCNetSDK.dll")]
+        public static extern int NET_DVR_StartDownload(int lUserID,
+            uint dwDownloadType, ref NET_DVR_CERT_PARAM lpInBuffer,
+            uint dwInBufferSize, string sFileName);
+
+        [DllImport("HCNetSDK.dll")]
+        public static extern bool NET_DVR_StopDownload(int lHandle);
 
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_StartDVRRecord(int lUserID, int lChannel, int lRecordType);
+
+        [DllImport("HCNetSDK.dll")]
+        public static extern bool NET_DVR_RemoteControl(int lUserID, uint dwCommand, IntPtr lpInBuffer, uint dwInBufferSize);
 
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_StopDVRRecord(int lUserID, int lChannel);

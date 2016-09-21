@@ -77,6 +77,7 @@
             this.btnRepBack = new System.Windows.Forms.Button();
             this.btnRepImgB = new System.Windows.Forms.Button();
             this.btnRepRec = new System.Windows.Forms.Button();
+            this.btnRepSnap = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -514,7 +515,7 @@
             // 
             // btnRepBack
             // 
-            this.btnRepBack.Location = new System.Drawing.Point(1042, 497);
+            this.btnRepBack.Location = new System.Drawing.Point(1086, 497);
             this.btnRepBack.Name = "btnRepBack";
             this.btnRepBack.Size = new System.Drawing.Size(45, 22);
             this.btnRepBack.TabIndex = 41;
@@ -534,7 +535,7 @@
             // 
             // btnRepRec
             // 
-            this.btnRepRec.Location = new System.Drawing.Point(570, 497);
+            this.btnRepRec.Location = new System.Drawing.Point(501, 497);
             this.btnRepRec.Name = "btnRepRec";
             this.btnRepRec.Size = new System.Drawing.Size(70, 22);
             this.btnRepRec.TabIndex = 43;
@@ -542,12 +543,23 @@
             this.btnRepRec.UseVisualStyleBackColor = true;
             this.btnRepRec.Click += new System.EventHandler(this.btnRepRec_Click);
             // 
+            // btnRepSnap
+            // 
+            this.btnRepSnap.Location = new System.Drawing.Point(577, 497);
+            this.btnRepSnap.Name = "btnRepSnap";
+            this.btnRepSnap.Size = new System.Drawing.Size(51, 22);
+            this.btnRepSnap.TabIndex = 44;
+            this.btnRepSnap.Text = "Snap";
+            this.btnRepSnap.UseVisualStyleBackColor = true;
+            this.btnRepSnap.Click += new System.EventHandler(this.btnRepSnap_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1143, 606);
+            this.Controls.Add(this.btnRepSnap);
             this.Controls.Add(this.btnRepRec);
             this.Controls.Add(this.btnRepImgB);
             this.Controls.Add(this.btnRepBack);
@@ -654,6 +666,7 @@
         private System.Windows.Forms.Button btnRepBack;
         private System.Windows.Forms.Button btnRepImgB;
         private System.Windows.Forms.Button btnRepRec;
+        private System.Windows.Forms.Button btnRepSnap;
     }
 }
 
