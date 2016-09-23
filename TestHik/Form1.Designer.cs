@@ -485,7 +485,7 @@
             // 
             // btnRepFF
             // 
-            this.btnRepFF.Location = new System.Drawing.Point(749, 497);
+            this.btnRepFF.Location = new System.Drawing.Point(726, 497);
             this.btnRepFF.Name = "btnRepFF";
             this.btnRepFF.Size = new System.Drawing.Size(40, 22);
             this.btnRepFF.TabIndex = 38;
@@ -495,7 +495,7 @@
             // 
             // btnRepImgF
             // 
-            this.btnRepImgF.Location = new System.Drawing.Point(961, 497);
+            this.btnRepImgF.Location = new System.Drawing.Point(981, 497);
             this.btnRepImgF.Name = "btnRepImgF";
             this.btnRepImgF.Size = new System.Drawing.Size(55, 22);
             this.btnRepImgF.TabIndex = 39;
@@ -505,7 +505,7 @@
             // 
             // btnRepRevert
             // 
-            this.btnRepRevert.Location = new System.Drawing.Point(703, 497);
+            this.btnRepRevert.Location = new System.Drawing.Point(680, 497);
             this.btnRepRevert.Name = "btnRepRevert";
             this.btnRepRevert.Size = new System.Drawing.Size(40, 22);
             this.btnRepRevert.TabIndex = 40;
@@ -525,7 +525,7 @@
             // 
             // btnRepImgB
             // 
-            this.btnRepImgB.Location = new System.Drawing.Point(900, 497);
+            this.btnRepImgB.Location = new System.Drawing.Point(920, 497);
             this.btnRepImgB.Name = "btnRepImgB";
             this.btnRepImgB.Size = new System.Drawing.Size(55, 22);
             this.btnRepImgB.TabIndex = 42;
@@ -537,7 +537,7 @@
             // 
             this.btnRepRec.Location = new System.Drawing.Point(501, 497);
             this.btnRepRec.Name = "btnRepRec";
-            this.btnRepRec.Size = new System.Drawing.Size(70, 22);
+            this.btnRepRec.Size = new System.Drawing.Size(55, 22);
             this.btnRepRec.TabIndex = 43;
             this.btnRepRec.Text = "Record";
             this.btnRepRec.UseVisualStyleBackColor = true;
@@ -545,9 +545,9 @@
             // 
             // btnRepSnap
             // 
-            this.btnRepSnap.Location = new System.Drawing.Point(577, 497);
+            this.btnRepSnap.Location = new System.Drawing.Point(562, 497);
             this.btnRepSnap.Name = "btnRepSnap";
-            this.btnRepSnap.Size = new System.Drawing.Size(51, 22);
+            this.btnRepSnap.Size = new System.Drawing.Size(55, 22);
             this.btnRepSnap.TabIndex = 44;
             this.btnRepSnap.Text = "Snap";
             this.btnRepSnap.UseVisualStyleBackColor = true;

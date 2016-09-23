@@ -879,6 +879,8 @@ namespace TestHik
         public const int NET_DVR_AUDIOSTREAMDATA = 3;
         public const int NET_DVR_STD_VIDEODATA = 4;
         public const int NET_DVR_STD_AUDIODATA = 5;
+        public const int NET_DVR_CHANGE_FORWARD = 10;
+        public const int NET_DVR_CHANGE_REVERSE = 11;
 
 
         public const int NET_DVR_REALPLAYEXCEPTION = 111;
@@ -4778,7 +4780,17 @@ namespace TestHik
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_PlayBackControl_V40(int lPlayHandle,
             uint dwControlCode, IntPtr lpInBuffer, uint dwInLen,
-            IntPtr lpOutBuffer, ref uint lpOutLen);
+            IntPtr lpOutBuffer, ref uint lpOutLen); // lpOutBuffer si lpInBuffer: neinteresante
+
+        [DllImport("HCNetSDK.dll")]
+        public static extern bool NET_DVR_PlayBackControl_V40(int lPlayHandle,
+            uint dwControlCode, ref IntPtr lpInBuffer, uint dwInLen,
+            ref IntPtr lpOutBuffer, ref uint lpOutLen);
+        /*
+        [DllImport("HCNetSDK.dll")]
+        public unsafe static extern bool NET_DVR_PlayBackControl_V40(int lPlayHandle,
+            uint dwControlCode, IntPtr lpInBuffer, uint dwInLen,
+            void* lpOutBuffer, ref uint lpOutLen);*/
 
         [DllImport("HCNetSDK.dll")]
         public static extern int NET_DVR_GetFileByTime_V40(int lUserID, string sSavedFileName, ref NET_DVR_PLAYCOND pDownloadCond);
@@ -4788,13 +4800,13 @@ namespace TestHik
 
 
         public delegate void PLAYDATACALLBACK(int lPlayHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, uint dwUser);
-        public delegate void PLAYDATACALLBACK_V40(int lPlayHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, uint dwUser);
-
+        public delegate void PlayDataCallBack_V40(int lPlayHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser);
+        
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_SetPlayDataCallBack(int lPlayHandle, PLAYDATACALLBACK fPlayDataCallBack, uint dwUser);
 
         [DllImport("HCNetSDK.dll")]
-        public static extern bool NET_DVR_SetPlayDataCallBack_V40(int lPlayHandle, PLAYDATACALLBACK_V40 cbPlayDataCallBack, uint pUser);
+        public static extern bool NET_DVR_SetPlayDataCallBack_V40(int lPlayHandle, PlayDataCallBack_V40 cbPlayDataCallBack, IntPtr pUser);
 
         [DllImport("HCNetSDK.dll")]
         public static extern bool NET_DVR_PlayBackSaveData(int lPlayHandle, string sFileName);

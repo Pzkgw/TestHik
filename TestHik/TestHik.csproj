@@ -105,6 +105,9 @@
     <Compile Include="Replay.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ReplayUtils.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
