@@ -29,10 +29,10 @@ namespace TestHik
         const uint m_rep_oreInMinus = 0; // diferenta de ore, daca exista
         int m_rep_canal = 39;
         int m_rep_setOre = 0; // inregistarea sa inceapa de acum minus m_rep_setOre, m_rep_setMin
-        int m_rep_setMin = 1;
+        int m_rep_setMin = 2;
         int m_rep_foundHandle = -5; // record file pentru
         //int m_repPath; // 1:play 2:stop 3:reverse 30: fast forward
-        const int bufferSize = 3000 * 1024;
+        const int bufferSize = 6 * 1024 * 1024;
         uint m_repBuffSz = bufferSize; // buffer size
         //byte[] m_repBuffb = new byte[bufferSize];
         //IntPtr m_repBuff;
@@ -114,6 +114,8 @@ namespace TestHik
                 SetReplayCtrlsVisibility(true, true);
 
                 GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
+
+                FindFiles(canal);
 
                 pVodPara.struBeginTime = timeStart;
                 pVodPara.struEndTime = timeStop;
@@ -807,6 +809,94 @@ namespace TestHik
             {
                 BeginInvoke(del, "snap image fail : " + CHCNetSDK.NET_DVR_GetLastError());
             }
+        }
+
+
+
+
+
+
+
+
+        private void FindFiles(int canal)
+        {
+            // caut fisierele existente in intervalul de timp si canalul specificat                       
+
+            struFileCond.lChannel = canal;
+            struFileCond.struStartTime = timeStart;
+            struFileCond.struStopTime = timeStop;
+            struFileCond.byDrawFrame = 0;
+
+            //---------------------------------------
+            //Find record file
+            m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
+
+            //MessageBox.Show("struFileCond.struStartTime = " + struFileCond.struStartTime.dwHour.ToString());
+
+            if (m_rep_foundHandle < 0)
+            {
+                MessageBox.Show(string.Format("WARNING: FindFile failed for channel {0}. Last SDK error: {1}", canal, CHCNetSDK.NET_DVR_GetLastError()));
+            }
+            else // jump around cu findNext
+            {
+
+
+
+                BeginInvoke(del, "");
+
+                //msg.Format(_T("REPORT: Searching files for channel %d..."), ch);
+
+
+
+                int result = 0;
+                int nTotalFiles = 0;
+
+                struFileData.struStartTime = timeStart;
+                struFileData.struStopTime = timeStop;
+
+                do
+                {
+
+                    result = CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
+
+                    //BeginInvoke(del, "result = " + result.ToString());
+
+                    if (result == CHCNetSDK.NET_DVR_ISFINDING)
+                    {
+                        continue;
+                    }
+                    else
+                    if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
+                    {
+                        BeginInvoke(del, struFileData.sFileName + "  ____________   DE LA " + GetDate(struFileData.struStartTime).ToLongTimeString() + "  LA  " + GetDate(struFileData.struStopTime).ToLongTimeString());
+                        //timeFileStart = struFileData.struStartTime;
+                        //timeFileStop = struFileData.struStopTime;
+                        ++nTotalFiles;
+                    }
+                    else
+                    {
+                        if (result == CHCNetSDK.NET_DVR_FILE_NOFIND || result == CHCNetSDK.NET_DVR_NOMOREFILE)
+                        {
+                            //MessageBox.Show("No (more) files for this channel!");
+                        }
+                        else
+                        {
+                            //MessageBox.Show(string.Format("Unable to FindNextFile() due to a unknown state! NET SDK err = {0}", CHCNetSDK.NET_DVR_GetLastError()));
+                        }
+                        break;
+                    }
+
+                } while (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING);
+
+
+                BeginInvoke(del, "FILES TOTAL NR: " + nTotalFiles.ToString());
+
+            }
+
+            // Stop finding
+            CHCNetSDK.NET_DVR_FindClose_V30(m_rep_foundHandle);
+
+
         }
 
 

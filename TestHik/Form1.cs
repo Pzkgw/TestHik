@@ -70,6 +70,8 @@ namespace TestHik
         [DllImport("Filters.dll", SetLastError = true, EntryPoint = "YV12ToBGR24", CallingConvention = CallingConvention.Cdecl)]
         private unsafe static extern int YV12ToBGR24(byte* pSource, int nSourceSize, byte* pDest, int nWidth, int nHeight);//
 
+        int cf = 0;
+
         //readonly object lo1 = new object(), lo2 = new object(), lo3 = new object();
         // callback pentru receptionarea frame-urilor (in format YV12)
         public delegate void fDisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved);
@@ -125,6 +127,15 @@ namespace TestHik
 
                 }
             }
+
+            ++cf;
+            if(cf == 16)
+            {
+                PlayM4_ResetSourceBufFlag(m_repPlayerPort);
+                //PlayM4_ResetSourceBuffer(m_repPlayerPort);
+                cf = 0;
+            }
+
         }
 
         public void LoginResultCallBack(int lUserID, int dwResult, ref CHCNetSDK.NET_DVR_DEVICEINFO_V30 lpDeviceInfo, IntPtr pUser)
@@ -184,6 +195,12 @@ namespace TestHik
         //*************************************************************************
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_GetPort(ref int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_ResetSourceBuffer(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_ResetSourceBufFlag(int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern uint PlayM4_GetCurrentFrameNum(int nPort);
