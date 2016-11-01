@@ -4438,7 +4438,7 @@ namespace TestHik
         [StructLayoutAttribute(LayoutKind.Sequential)]
         public struct NET_DVR_FILECOND_V40
         {
-            public int lChannel; public uint dwFileType;
+            public uint lChannel; public uint dwFileType;
             public uint dwIsLocked; public uint dwUseCardNo;
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 32, ArraySubType = UnmanagedType.I1)]
             public byte[] sCardNumber;
@@ -4584,7 +4584,7 @@ namespace TestHik
         [DllImport("HCNetSDK.dll")]
         public static extern Int32 NET_SDK_RealPlay(int iUserLogID, ref NET_SDK_CLIENTINFO lpDVRClientInfo);
 
-        public delegate void REALDATACALLBACK(Int32 lRealHandle, UInt32 dwDataType, IntPtr pBuffer, int dwBufSize, IntPtr pUser);
+        public delegate void REALDATACALLBACK(Int32 lRealHandle, UInt32 dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser);
         [DllImport("HCNetSDK.dll")]
         public static extern int NET_DVR_RealPlay_V30(int iUserID, ref NET_DVR_CLIENTINFO lpClientInfo, REALDATACALLBACK fRealDataCallBack_V30, IntPtr pUser, UInt32 bBlocked);
 

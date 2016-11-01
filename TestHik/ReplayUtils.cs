@@ -9,6 +9,24 @@ namespace TestHik
 {
     public partial class Form1 : Form
     {
+        struct FRAME_POS { long nFilePos; long nFrameNum; long nFrameTime; };
+        public delegate void funVerify(int nPort, IntPtr pFilePos,  uint bIsVideo, uint nUser);
+
+        public delegate void FileEndCallback(int nPort, IntPtr pUser);
+
+        FileEndCallback fepb;
+        void FileEnd(int nPort, IntPtr pUser)
+        {
+            BeginInvoke(del, "FILE END");
+        }
+
+        public delegate void FileRefDoneCallback(int nPort, IntPtr pUser);
+        FileRefDoneCallback ferb;
+        void FileRef(int nPort, IntPtr pUser)
+        {
+            BeginInvoke(del, "FILE REF");
+        }
+
         // get current DVR time --> timeDVR
         private bool TimeDVRUpdate()
         {
@@ -52,7 +70,7 @@ namespace TestHik
                 d0 = d0.AddHours(sOre * -1);
                 d0 = d0.AddMinutes(sMinute * -1);
 
-                d1 = d1.AddHours(3);
+                //d1 = d1.AddMinutes(-2);
 
                 UpDvrDate(d0, ref startTime);
                 UpDvrDate(d1, ref stopTime);

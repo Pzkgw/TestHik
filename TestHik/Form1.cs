@@ -1,24 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-
-
-using System.Threading;
-using System.Globalization;
 using System.Drawing.Imaging;// pt PixelFormat
-using System.Activities.Statements;
 
 namespace TestHik
 {
@@ -77,6 +65,10 @@ namespace TestHik
         public delegate void fDisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved);
         private void DisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved)
         {
+
+            //BeginInvoke(del, DateTime.Now.ToShortTimeString());
+            //BeginInvoke(del, PlayM4_GetFileTime(nPort).ToString());
+
             //lock (lo2)
             {
                 if (nType == 3 && (nSize > 0) && (nPort >= 0) && ((nWidth * nHeight * 3) == (nSize * 2)))
@@ -123,18 +115,18 @@ namespace TestHik
                         pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
                     pictureBox1.BackgroundImage = bitmap;
 
-                    
-
                 }
             }
 
+
+            /*
             ++cf;
             if(cf == 16)
             {
                 PlayM4_ResetSourceBufFlag(m_repPlayerPort);
                 //PlayM4_ResetSourceBuffer(m_repPlayerPort);
                 cf = 0;
-            }
+            }*/
 
         }
 
@@ -193,8 +185,13 @@ namespace TestHik
         }
 
         //*************************************************************************
+
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_GetPort(ref int nPort);
+        private static extern bool PlayM4_SetVerifyCallBack(int nPort,
+            uint nBeginTime, uint nEndTime, IntPtr funVerify, uint nUser);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_GetPort(ref int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_ResetSourceBuffer(int nPort);
@@ -206,10 +203,16 @@ namespace TestHik
         private static extern uint PlayM4_GetCurrentFrameNum(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_SetStreamOpenMode(int nPort, int nMode);
+        private static extern uint PlayM4_GetLastError(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_OpenStream(int nPort, out byte pFileHeadBuf, int nSize, int nBufPoolSize);
+        private static extern bool PlayM4_SetStreamOpenMode(int nPort, int nMode);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_OpenStream(int nPort, ref IntPtr pFileHeadBuf, uint nSize, uint nBufPoolSize);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern bool PlayM4_OpenFile(int nPort, string pFileHeadBuf);
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_OpenStreamEx(int nPort, ref byte pFileHeadBuf, uint nSize, uint nBufPoolSize);
@@ -218,7 +221,7 @@ namespace TestHik
         private static extern bool PlayM4_CloseStreamEx(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_Play(int nPort, IntPtr hWnd);
+        private static extern bool PlayM4_Play(int nPort, IntPtr hWnd);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_Fast(int nPort);
@@ -242,16 +245,22 @@ namespace TestHik
         private static extern uint PlayM4_GetPlayedTimeEx(int nPort);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_SetDisplayCallBack(int nPort, fDisplayCallBack_Hik pProc);
+        private static extern bool PlayM4_SetDisplayCallBack(int nPort, fDisplayCallBack_Hik pProc);
 
         [DllImport("PlayCtrl.dll")]
-        private static extern int PlayM4_SetDisplayBuf(int nPort, int nNum);// the number of images to be buffered
+        private static extern bool PlayM4_SetDisplayBuf(int nPort, int nNum);// the number of images to be buffered
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_SetCurrentFrameNum(int nPort, uint nFrameNum);
 
         [DllImport("PlayCtrl.dll")]
         private unsafe static extern bool PlayM4_InputData(int nPort, byte* pBuf, uint nSize);
+
+        [DllImport("PlayCtrl.dll")]
+        private unsafe static extern bool PlayM4_SetFileRefCallBack(int nPort, FileRefDoneCallback fFileEndCBFun, IntPtr pUser);
+
+        [DllImport("PlayCtrl.dll")]
+        private unsafe static extern bool PlayM4_SetFileEndCallback(int nPort, FileEndCallback fFileEndCBFun, IntPtr pUser);
 
         [DllImport("PlayCtrl.dll")]
         private unsafe static extern bool PlayM4_InputVideoData(int nPort, byte* pBuf, uint nSize);
@@ -261,6 +270,9 @@ namespace TestHik
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_Stop(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern uint PlayM4_GetFileTime(int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern int PlayM4_FreePort(int nPort);
@@ -772,7 +784,7 @@ namespace TestHik
         }
 
 
-        public void RealDataCallBack(Int32 lRealHandle, UInt32 dwDataType, IntPtr pBuffer, int dwBufSize, IntPtr pUser)
+        public void RealDataCallBack(Int32 lRealHandle, UInt32 dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr pUser)
         {
             //BeginInvoke(new MyDebugInfo(DebugInfo), string.Format("RealDataCallBack lRealHandle[{0}], dwDataType[{1}], dwBufSize[{2}]", lRealHandle, dwDataType, dwBufSize));
             //if (dwBufSize > 0 && (dwDataType == CHCNetSDK.NET_DVR_SYSHEAD || dwDataType == CHCNetSDK.NET_DVR_STREAMDATA))
@@ -790,20 +802,20 @@ namespace TestHik
 
             if (dwDataType == CHCNetSDK.NET_DVR_SYSHEAD && dwBufSize > 0)
             {
-                if (PlayM4_GetPort(ref nPlayerPort) != 0)
+                if (PlayM4_GetPort(ref nPlayerPort))
                 {
                     //BeginInvoke(new MyDebugInfo(DebugInfo), string.Format("RealDataCallBack GetPort => [{0}]", nPlayerPort));
                     if (nPlayerPort >= 0)
                     {
-                        if (PlayM4_SetStreamOpenMode(nPlayerPort, 0) != 0) //STREAME_REALTIME == 0
+                        if (PlayM4_SetStreamOpenMode(nPlayerPort, 0)) //STREAME_REALTIME == 0
                         {
-                            byte byFileHeadBuf;
-                            if (PlayM4_OpenStream(nPlayerPort, out byFileHeadBuf, (int)dwBufSize, 2000 * 1000) != 0)
+                            IntPtr byFileHeadBuf = new IntPtr();
+                            if (PlayM4_OpenStream(nPlayerPort, ref byFileHeadBuf, dwBufSize, 2000 * 1000))
                             {
-                                if (PlayM4_Play(nPlayerPort, IntPtr.Zero) != 0)  //Start play
+                                if (PlayM4_Play(nPlayerPort, IntPtr.Zero))  //Start play
                                 {
                                     fDisplayCallBack_Hik fdcb = new fDisplayCallBack_Hik(DisplayCallBack_Hik);
-                                    if (PlayM4_SetDisplayCallBack(nPlayerPort, fdcb) != 0)
+                                    if (PlayM4_SetDisplayCallBack(nPlayerPort, fdcb))
                                     {
                                         //lock (dataLock)
                                         {
@@ -858,7 +870,7 @@ namespace TestHik
                 {
                     // copiez continutul intr-un array byte[]
                     byte[] bInfo = new byte[dwBufSize];
-                    Marshal.Copy(pBuffer, bInfo, 0, dwBufSize);
+                    Marshal.Copy(pBuffer, bInfo, 0, (int)dwBufSize);
 
                     // transmit player-ului bufferul (fiindca folosesc aceeasi metoda pentru toate instantele callbackurilor voi folosi un lock dedicat player-ului)
                     //lock (playerLock)
