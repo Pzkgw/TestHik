@@ -70,6 +70,8 @@ namespace TestHik
                 d0 = d0.AddHours(sOre * -1);
                 d0 = d0.AddMinutes(sMinute * -1);
 
+                d1 = d1.AddMinutes(50);
+                //d1 = d1.AddSeconds(10);
                 //d1 = d1.AddMinutes(-2);
 
                 UpDvrDate(d0, ref startTime);
@@ -79,7 +81,10 @@ namespace TestHik
             return false;
         }
 
-
+        private uint GetSeconds(CHCNetSDK.NET_DVR_TIME t)
+        {
+            return t.dwHour * 3600 + t.dwMinute * 60 + t.dwSecond;
+        }
 
     }
 }

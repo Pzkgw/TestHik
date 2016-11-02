@@ -128,7 +128,21 @@ namespace TestHik
                 cf = 0;
             }*/
 
+            //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
+
+            kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
+
+            if ((kkl < 4294967200) &&
+                (kkl >= (GetSeconds(struFileData.struStopTime) - GetSeconds(timeStart) - 3)))
+            {
+                BeginInvoke(del, kkl.ToString());
+                (new System.Threading.Thread(() => SetReplay(-2, true))).Start();
+            }
         }
+
+
+        uint kkl = 0;
+
 
         public void LoginResultCallBack(int lUserID, int dwResult, ref CHCNetSDK.NET_DVR_DEVICEINFO_V30 lpDeviceInfo, IntPtr pUser)
         {
@@ -231,6 +245,9 @@ namespace TestHik
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_OneByOneBack(int nPort);
+
+        [DllImport("PlayCtrl.dll")]
+        private static extern uint PlayM4_GetPlayedTime(int nPort);
 
         [DllImport("PlayCtrl.dll")]
         private static extern bool PlayM4_SetPlayPos(int nPort, float fRelativePos);

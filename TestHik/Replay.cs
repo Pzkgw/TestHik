@@ -67,8 +67,10 @@ namespace TestHik
             m_rep_CallBack = new CHCNetSDK.PlayDataCallBack_V40(ReplayCallBack);
             m_rep_DisplayCallBack = new fDisplayCallBack_Hik(DisplayCallBack_Hik);
 
+
             pVodPara.struIDInfo = new CHCNetSDK.NET_DVR_STREAM_INFO();
             pVodPara.dwSize = (uint)Marshal.SizeOf(pVodPara);
+
             //pVodPara.byDrawFrame = 0;
             pVodPara.hWnd = IntPtr.Zero; // poate e schimbata la ref din NET_DVR_PlayBackByTime_V40, dar sigur cu 0 intra in iterare
             
@@ -76,7 +78,7 @@ namespace TestHik
             timePtr_DVR = MarshalToPointer(timeDVR);
 
             // pana aici sunt necesare
-            pDownloadCond.byDrawFrame = 0; // record replay
+            //pDownloadCond.byDrawFrame = 0; // record replay
 
             fepb = new FileEndCallback(FileEnd);
             ferb = new FileRefDoneCallback(FileRef);
@@ -114,19 +116,26 @@ namespace TestHik
         {
             if (on)
             {
-                SetReplay(-1, false); // stop replay
-                CloseVideo(); // stop real-play, do eet .. daca e nevoie
+                SetReplay(-1, false); // stop replay               
 
-                SetReplayCtrlsVisibility(true, true);
+                if (canal != -2)
+                {
+                    CloseVideo(); // stop real-play, do eet .. daca e nevoie
 
-                GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
+                    SetReplayCtrlsVisibility(true, true);
 
-                FindFiles(canal);
+                    GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);                    
+                }
+                else
+                {
+                    UpDvrDate(GetDate(timeStart).AddSeconds(kkl), ref timeStart);
+                }
+
+                FindFiles(((canal == -2) ? (int)pVodPara.struIDInfo.dwChannel : canal));
 
                 pVodPara.struBeginTime = timeStart;
                 pVodPara.struEndTime = timeStop;
-                pVodPara.struIDInfo.dwChannel = (uint)canal;
-                //pVodPara.byRes = new byte[31];
+                if (canal != -2) pVodPara.struIDInfo.dwChannel = (uint)canal;
 
                 pbb = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
                 //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
@@ -134,21 +143,39 @@ namespace TestHik
 
                 if (pbb < 0)
                 {
-                    MessageBox.Show("NET_DVR_PlayBackByTime_V40 failed");
+                    BeginInvoke(del, "FAILED ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
                     return;
                 }
                 else
                 {
-                    playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
-                    playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
+/*
+                    IntPtr pUser = new IntPtr();
+
+                    CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
+
+                    lpPreviewInfo.lChannel = Convert.ToUInt16(textBox_Ch.Text); //35; // channel number starting from 1 (pentru analogice)
+                    lpPreviewInfo.dwStreamType = 1; // 0=mainstream, 1=sub-stream
+                    lpPreviewInfo.dwLinkMode = 0; // 0-tcp, 1-udp, 2-multicast, 3-rtp, 4-rtp/rtps, 5-rstp/http
+                    lpPreviewInfo.hPlayWnd = IntPtr.Zero;//pictureBox1.Handle;
+                    lpPreviewInfo.bBlocked = 0; // 0-non-blocking stream, 1-blocking stream;
+                    //lpPreviewInfo.dwDisplayBufNum = 5;
+
+                    m_fRealDataCallBack = new CHCNetSDK.REALDATACALLBACK(RealDataCallBack);
+
+                    m_lRealHandle = CHCNetSDK.NET_DVR_RealPlay_V40(m_lUserID, ref lpPreviewInfo, m_fRealDataCallBack, pUser);
+*/
                     
+                    playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
+                    //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
 
                     if (playbackStart)
                     {
                         m_User = new IntPtr(m_lUserID);
                         playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(pbb, m_rep_CallBack, m_User);
-                        if (playbackStart) BeginInvoke(del, " ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
+                        
                     }
+
+                    BeginInvoke(del, playbackStart.ToString() + " ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
 
                 }
 
@@ -167,7 +194,7 @@ namespace TestHik
                     if (canal != -1) m_repPlayerPort = -1;*/
                 }
 
-                if (canal != -1)
+                if (canal > 0)
                 {
                     SetReplayCtrlsVisibility(false, true);
                     if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
@@ -221,15 +248,15 @@ namespace TestHik
                             //break;
                         }
 
-                        if (!PlayM4_SetFileEndCallback(m_repPlayerPort, fepb, IntPtr.Zero))  //设置实时流播放模式
+                       // if (!PlayM4_SetFileEndCallback(m_repPlayerPort, fepb, IntPtr.Zero))  //设置实时流播放模式
                         {
-                            BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
+                            //BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
                             //break;
                         }
 
                         if (!PlayM4_OpenStream(m_repPlayerPort, ref pBuffer, dwBufSize, 2 * 1024 * 1024)) //打开流接口
                         {
-                            BeginInvoke(del, "PlayM4_OpenStream Failed!");break;
+                            BeginInvoke(del, "PlayM4_OpenStream Failed!"); break;
                         }
 
                         /*
@@ -242,11 +269,11 @@ namespace TestHik
                         CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
 
 
-                        if (!PlayM4_OpenFile(m_repPlayerPort, struFileData.sFileName))
+                        if (!PlayM4_OpenFile(m_repPlayerPort, struFileData.sFileName+ ".mp4"))
                         {
                             BeginInvoke(del, "PlayM4_OpenFile Failed!");
                             break;
-                        }*/
+                        }
 
                         if (!PlayM4_SetDisplayBuf(m_repPlayerPort, 15))
                         {
@@ -254,8 +281,8 @@ namespace TestHik
                             BeginInvoke(del, "PlayM4_SetDisplayBuf Failed!");
                             //MessageBox.Show(dwErr.ToString());
                             //break;
-                        }
-                        
+                        }*/
+
 
                         if (!PlayM4_Play(m_repPlayerPort, IntPtr.Zero))// m_EagleEyePanel.Handle)) //播放开始
                         {
@@ -297,11 +324,11 @@ namespace TestHik
                                 else
                                     break;
                             }
-                        }
-                    
+                        }                       
+
+                    }
 
 
-            }
 
                         break;
             }
