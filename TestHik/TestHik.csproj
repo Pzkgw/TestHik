@@ -73,9 +73,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Infragistics4.Shared.v14.2, Version=14.2.20142.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL" />
-    <Reference Include="Infragistics4.Win.Misc.v14.2, Version=14.2.20142.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL" />
-    <Reference Include="Infragistics4.Win.v14.2, Version=14.2.20142.1000, Culture=neutral, PublicKeyToken=7dd5c3163f2cd0cb, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Activities" />
     <Reference Include="System.Core" />

@@ -7,6 +7,8 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Drawing.Imaging;// pt PixelFormat
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TestHik
 {
@@ -65,9 +67,15 @@ namespace TestHik
         public delegate void fDisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved);
         private void DisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved)
         {
-
+            //BeginInvoke(del, string.Format("****** DisplayCallBack_Hik size={0}, dim({1}x{2})",nSize,nWidth,nHeight));
             //BeginInvoke(del, DateTime.Now.ToShortTimeString());
             //BeginInvoke(del, PlayM4_GetFileTime(nPort).ToString());
+            /*
+            BeginInvoke(del,
+                "BUF_VIDEO_SRC: " + PlayM4_GetBufferValue(nPort, 1).ToString()
+                 + Environment.NewLine + "BUF_VIDEO_RENDER: " + PlayM4_GetBufferValue(nPort, 3).ToString()
+                 + Environment.NewLine + "BUF_VIDEO_DECODED: " + PlayM4_GetBufferValue(nPort, 5).ToString());
+                 */
 
             //lock (lo2)
             {
@@ -132,11 +140,12 @@ namespace TestHik
 
             kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
 
-            if ((kkl < 4294967200) &&
-                (kkl >= (GetSeconds(struFileData.struStopTime) - GetSeconds(timeStart) - 3)))
+            if ((kkl < uint.MaxValue) &&
+                (((int)kkl - (GetSeconds(struFileData.struStopTime) - GetSeconds(timeStart) - 3))) > -1)
             {
                 BeginInvoke(del, kkl.ToString());
-                (new System.Threading.Thread(() => SetReplay(-2, true))).Start();
+                //(new Thread(() => SetReplay(-2, true))).Start();
+                Task.Run(() => SetReplay(-2, true));
             }
         }
 
@@ -271,6 +280,9 @@ namespace TestHik
         private static extern bool PlayM4_SetCurrentFrameNum(int nPort, uint nFrameNum);
 
         [DllImport("PlayCtrl.dll")]
+        private static extern uint PlayM4_GetBufferValue(int nPort, uint nBufType);
+
+        [DllImport("PlayCtrl.dll")]
         private unsafe static extern bool PlayM4_InputData(int nPort, byte* pBuf, uint nSize);
 
         [DllImport("PlayCtrl.dll")]
@@ -331,7 +343,9 @@ namespace TestHik
             {
                 if (str.Length > 0)
                 {
+                    DateTime dtNow = DateTime.Now;
                     str += Environment.NewLine;
+                    str = string.Format("{0:00}:{1:00}:{2:00}.{3:000} ",dtNow.Hour, dtNow.Minute, dtNow.Second,dtNow.Millisecond) + str;
                     textBox2.AppendText(str);
                 }
             }
@@ -899,6 +913,7 @@ namespace TestHik
                                 // Transmit player-ului informatia bruta (nedecodata), iar acesta va trimite periodic, prin callback-ul <DisplayCallBack>, 
                                 // cate un buffer pt un frame YUV, imediat ce o imagine va fi compusa din aceste franturi de informatii brute.
                                 PlayM4_InputData(nPlayerPort, pb, (uint)dwBufSize);
+                                BeginInvoke(del, "****** PlayM4_InputData size=" + dwBufSize.ToString());
                             }
                         }
                     }

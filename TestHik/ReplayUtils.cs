@@ -70,9 +70,10 @@ namespace TestHik
                 d0 = d0.AddHours(sOre * -1);
                 d0 = d0.AddMinutes(sMinute * -1);
 
-                d1 = d1.AddMinutes(50);
+                //d1 = d1.AddMinutes(50);
                 //d1 = d1.AddSeconds(10);
                 //d1 = d1.AddMinutes(-2);
+                d1 = d1.AddDays(1);
 
                 UpDvrDate(d0, ref startTime);
                 UpDvrDate(d1, ref stopTime);
