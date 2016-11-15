@@ -1042,7 +1042,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
 
 
-
+        uint deft;
 
 
         private void FindFiles(int canal)
@@ -1061,13 +1061,14 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
             //---------------------------------------
             //Find record file
+            uint deft1;
             bool keepTry = true;
             while (keepTry)
             {
                 // Necesita retry pentru ca mai purcede spre eroarea 7 cateodata:
                 // 7: Failed to connect to the device. The device is off-line, or connection timeout caused by network. 
                 m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
-                
+
 
                 if (m_rep_foundHandle < 0)
                 {
@@ -1095,8 +1096,23 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                                 "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
 
                             //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
+                            deft = uint.MaxValue;
+                            if ((GetSeconds(timeStart) + 8) < GetSeconds(struFileData.struStopTime))
+                            {
+                                deft = GetSeconds(struFileData.struStopTime);
+                                deft1 = GetSeconds(timeStart);
+                                if (deft >= deft1)
+                                {
+                                    deft = deft - deft1;
+                                    //if (deft > 3) deft = 0;
 
-                            if ((GetSeconds(timeStart) + 8) < GetSeconds(struFileData.struStopTime)) keepTry = false;
+                                }
+                                else
+                                {
+                                    deft = uint.MaxValue;
+                                }
+                                keepTry = false;
+                            }
                             ++nTotalFiles;
                         }
                         else

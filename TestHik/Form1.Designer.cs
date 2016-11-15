@@ -79,7 +79,9 @@
             this.btnRepRec = new System.Windows.Forms.Button();
             this.btnRepSnap = new System.Windows.Forms.Button();
             this.btnRR = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -149,6 +151,7 @@
             this.textBox2.Location = new System.Drawing.Point(12, 222);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
             this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox2.Size = new System.Drawing.Size(467, 306);
             this.textBox2.TabIndex = 7;
@@ -345,6 +348,7 @@
             // 
             // checkBox2
             // 
+            this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox2.AutoSize = true;
             this.checkBox2.Location = new System.Drawing.Point(1023, 575);
             this.checkBox2.Name = "checkBox2";
@@ -476,9 +480,12 @@
             // 
             // btnRepPause
             // 
-            this.btnRepPause.Location = new System.Drawing.Point(821, 497);
+            this.btnRepPause.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepPause.AutoSize = true;
+            this.btnRepPause.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepPause.Location = new System.Drawing.Point(277, 19);
             this.btnRepPause.Name = "btnRepPause";
-            this.btnRepPause.Size = new System.Drawing.Size(45, 22);
+            this.btnRepPause.Size = new System.Drawing.Size(47, 23);
             this.btnRepPause.TabIndex = 37;
             this.btnRepPause.Text = "Pause";
             this.btnRepPause.UseVisualStyleBackColor = true;
@@ -486,9 +493,12 @@
             // 
             // btnRepFF
             // 
-            this.btnRepFF.Location = new System.Drawing.Point(726, 497);
+            this.btnRepFF.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepFF.AutoSize = true;
+            this.btnRepFF.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepFF.Location = new System.Drawing.Point(177, 19);
             this.btnRepFF.Name = "btnRepFF";
-            this.btnRepFF.Size = new System.Drawing.Size(40, 22);
+            this.btnRepFF.Size = new System.Drawing.Size(29, 23);
             this.btnRepFF.TabIndex = 38;
             this.btnRepFF.Text = ">>";
             this.btnRepFF.UseVisualStyleBackColor = true;
@@ -496,9 +506,12 @@
             // 
             // btnRepImgF
             // 
-            this.btnRepImgF.Location = new System.Drawing.Point(981, 497);
+            this.btnRepImgF.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepImgF.AutoSize = true;
+            this.btnRepImgF.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepImgF.Location = new System.Drawing.Point(426, 19);
             this.btnRepImgF.Name = "btnRepImgF";
-            this.btnRepImgF.Size = new System.Drawing.Size(55, 22);
+            this.btnRepImgF.Size = new System.Drawing.Size(42, 23);
             this.btnRepImgF.TabIndex = 39;
             this.btnRepImgF.Text = "> img";
             this.btnRepImgF.UseVisualStyleBackColor = true;
@@ -506,9 +519,12 @@
             // 
             // btnRepRevert
             // 
-            this.btnRepRevert.Location = new System.Drawing.Point(680, 497);
+            this.btnRepRevert.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepRevert.AutoSize = true;
+            this.btnRepRevert.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepRevert.Location = new System.Drawing.Point(148, 19);
             this.btnRepRevert.Name = "btnRepRevert";
-            this.btnRepRevert.Size = new System.Drawing.Size(40, 22);
+            this.btnRepRevert.Size = new System.Drawing.Size(23, 23);
             this.btnRepRevert.TabIndex = 40;
             this.btnRepRevert.Text = "<";
             this.btnRepRevert.UseVisualStyleBackColor = true;
@@ -516,9 +532,12 @@
             // 
             // btnRepBack
             // 
-            this.btnRepBack.Location = new System.Drawing.Point(1086, 497);
+            this.btnRepBack.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepBack.AutoSize = true;
+            this.btnRepBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepBack.Location = new System.Drawing.Point(579, 19);
             this.btnRepBack.Name = "btnRepBack";
-            this.btnRepBack.Size = new System.Drawing.Size(45, 22);
+            this.btnRepBack.Size = new System.Drawing.Size(24, 23);
             this.btnRepBack.TabIndex = 41;
             this.btnRepBack.Text = "X";
             this.btnRepBack.UseVisualStyleBackColor = true;
@@ -526,9 +545,12 @@
             // 
             // btnRepImgB
             // 
-            this.btnRepImgB.Location = new System.Drawing.Point(920, 497);
+            this.btnRepImgB.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepImgB.AutoSize = true;
+            this.btnRepImgB.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepImgB.Location = new System.Drawing.Point(378, 19);
             this.btnRepImgB.Name = "btnRepImgB";
-            this.btnRepImgB.Size = new System.Drawing.Size(55, 22);
+            this.btnRepImgB.Size = new System.Drawing.Size(42, 23);
             this.btnRepImgB.TabIndex = 42;
             this.btnRepImgB.Text = "< img";
             this.btnRepImgB.UseVisualStyleBackColor = true;
@@ -536,9 +558,12 @@
             // 
             // btnRepRec
             // 
-            this.btnRepRec.Location = new System.Drawing.Point(501, 497);
+            this.btnRepRec.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepRec.AutoSize = true;
+            this.btnRepRec.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepRec.Location = new System.Drawing.Point(6, 19);
             this.btnRepRec.Name = "btnRepRec";
-            this.btnRepRec.Size = new System.Drawing.Size(55, 22);
+            this.btnRepRec.Size = new System.Drawing.Size(52, 23);
             this.btnRepRec.TabIndex = 43;
             this.btnRepRec.Text = "Record";
             this.btnRepRec.UseVisualStyleBackColor = true;
@@ -546,9 +571,12 @@
             // 
             // btnRepSnap
             // 
-            this.btnRepSnap.Location = new System.Drawing.Point(562, 497);
+            this.btnRepSnap.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRepSnap.AutoSize = true;
+            this.btnRepSnap.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRepSnap.Location = new System.Drawing.Point(67, 19);
             this.btnRepSnap.Name = "btnRepSnap";
-            this.btnRepSnap.Size = new System.Drawing.Size(55, 22);
+            this.btnRepSnap.Size = new System.Drawing.Size(42, 23);
             this.btnRepSnap.TabIndex = 44;
             this.btnRepSnap.Text = "Snap";
             this.btnRepSnap.UseVisualStyleBackColor = true;
@@ -556,13 +584,35 @@
             // 
             // btnRR
             // 
-            this.btnRR.Location = new System.Drawing.Point(630, 497);
+            this.btnRR.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnRR.AutoSize = true;
+            this.btnRR.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btnRR.Location = new System.Drawing.Point(507, 19);
             this.btnRR.Name = "btnRR";
-            this.btnRR.Size = new System.Drawing.Size(39, 22);
+            this.btnRR.Size = new System.Drawing.Size(25, 23);
             this.btnRR.TabIndex = 45;
             this.btnRR.Text = "R";
             this.btnRR.UseVisualStyleBackColor = true;
             this.btnRR.Click += new System.EventHandler(this.button16_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.btnRepPause);
+            this.groupBox1.Controls.Add(this.btnRepBack);
+            this.groupBox1.Controls.Add(this.btnRepImgB);
+            this.groupBox1.Controls.Add(this.btnRepImgF);
+            this.groupBox1.Controls.Add(this.btnRepRec);
+            this.groupBox1.Controls.Add(this.btnRepSnap);
+            this.groupBox1.Controls.Add(this.btnRR);
+            this.groupBox1.Controls.Add(this.btnRepFF);
+            this.groupBox1.Controls.Add(this.btnRepRevert);
+            this.groupBox1.Location = new System.Drawing.Point(501, 489);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(630, 53);
+            this.groupBox1.TabIndex = 46;
+            this.groupBox1.TabStop = false;
             // 
             // Form1
             // 
@@ -570,15 +620,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1143, 606);
-            this.Controls.Add(this.btnRR);
-            this.Controls.Add(this.btnRepSnap);
-            this.Controls.Add(this.btnRepRec);
-            this.Controls.Add(this.btnRepImgB);
-            this.Controls.Add(this.btnRepBack);
-            this.Controls.Add(this.btnRepRevert);
-            this.Controls.Add(this.btnRepImgF);
-            this.Controls.Add(this.btnRepFF);
-            this.Controls.Add(this.btnRepPause);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label6);
@@ -623,6 +665,8 @@
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -680,6 +724,7 @@
         private System.Windows.Forms.Button btnRepRec;
         private System.Windows.Forms.Button btnRepSnap;
         private System.Windows.Forms.Button btnRR;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }
 

@@ -139,9 +139,9 @@ namespace TestHik
             //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
 
             kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
-
+            BeginInvoke(del, "a: " + kkl.ToString() + " b: " + deft.ToString());
             if ((kkl < uint.MaxValue) &&
-                (((int)kkl - (GetSeconds(struFileData.struStopTime) - GetSeconds(timeStart) - 3))) > -1)
+                (kkl > deft))
             {
                 BeginInvoke(del, kkl.ToString());
                 //(new Thread(() => SetReplay(-2, true))).Start();
