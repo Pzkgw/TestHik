@@ -181,7 +181,7 @@ namespace TestHik
 
                         }
 
-                        BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
+                        //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
 
                     }
 
@@ -1056,73 +1056,68 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
             BeginInvoke(del, "FILES_FROM_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
 
+            struFileData.struStartTime = timeStart;
+            struFileData.struStopTime = timeStop;
+
             //---------------------------------------
             //Find record file
-            for (int i = 0; i < 999; i++)
+            bool keepTry = true;
+            while (keepTry)
             {
                 // Necesita retry pentru ca mai purcede spre eroarea 7 cateodata:
                 // 7: Failed to connect to the device. The device is off-line, or connection timeout caused by network. 
                 m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
-                if (m_rep_foundHandle < 0) Thread.Sleep(4);
-                else
-                    break;
-            }
+                
 
-
-            if (m_rep_foundHandle < 0)
-            {
-                BeginInvoke(del, (string.Format("WARNING: FindFile failed for channel {0}. Last SDK error: {1}", canal, CHCNetSDK.NET_DVR_GetLastError())));
-            }
-            else // jump around cu findNext
-            {
-                BeginInvoke(del, "");
-
-                //msg.Format(_T("REPORT: Searching files for channel %d..."), ch);
-
-                int result = 0;
-                int nTotalFiles = 0;
-
-                struFileData.struStartTime = timeStart;
-                struFileData.struStopTime = timeStop;
-
-                do
+                if (m_rep_foundHandle < 0)
                 {
+                    BeginInvoke(del, (string.Format("WARNING: FindFile failed for channel {0}. Last SDK error: {1}", canal, CHCNetSDK.NET_DVR_GetLastError())));
+                }
+                else // jump around cu findNext
+                {
+                    int result = 0;
+                    int nTotalFiles = 0;
 
-                    result = CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
+                    do
+                    {
+                        result = CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
 
-                    //BeginInvoke(del, "result = " + result.ToString());
+                        //BeginInvoke(del, "result = " + result.ToString());
 
-                    if (result == CHCNetSDK.NET_DVR_ISFINDING)
-                    {
-                        continue;
-                    }
-                    else
-                    if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
-                    {
-                        BeginInvoke(del, struFileData.sFileName +
-                            "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
-                        //timeFileStart = struFileData.struStartTime;
-                        //timeFileStop = struFileData.struStopTime;
-                        ++nTotalFiles;
-                    }
-                    else
-                    {
-                        if (result == CHCNetSDK.NET_DVR_FILE_NOFIND || result == CHCNetSDK.NET_DVR_NOMOREFILE)
+                        if (result == CHCNetSDK.NET_DVR_ISFINDING)
                         {
-                            //MessageBox.Show("No (more) files for this channel!");
+                            continue;
+                        }
+                        else
+                        if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
+                        {
+                            BeginInvoke(del, struFileData.sFileName +
+                                "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
+
+                            //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
+
+                            if ((GetSeconds(timeStart) + 8) < GetSeconds(struFileData.struStopTime)) keepTry = false;
+                            ++nTotalFiles;
                         }
                         else
                         {
-                            //MessageBox.Show(string.Format("Unable to FindNextFile() due to a unknown state! NET SDK err = {0}", CHCNetSDK.NET_DVR_GetLastError()));
+                            if (result == CHCNetSDK.NET_DVR_FILE_NOFIND || result == CHCNetSDK.NET_DVR_NOMOREFILE)
+                            {
+                                //MessageBox.Show("No (more) files for this channel!");
+                            }
+                            else
+                            {
+                                //MessageBox.Show(string.Format("Unable to FindNextFile() due to a unknown state! NET SDK err = {0}", CHCNetSDK.NET_DVR_GetLastError()));
+                            }
+                            break;
                         }
-                        break;
-                    }
 
-                } while (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING);
+                    } while (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING);
 
 
-                //BeginInvoke(del, "FILES TOTAL NR: " + nTotalFiles.ToString());
+                    //BeginInvoke(del, "FILES TOTAL NR: " + nTotalFiles.ToString());
 
+                }
             }
 
             // Stop finding
@@ -1143,6 +1138,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             btnRepRevert.Visible = v;
             btnRepRec.Visible = v;
             btnRepSnap.Visible = v;
+            btnRR.Visible = v;
 
             btnRepFF.Text = ">>";
 

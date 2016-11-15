@@ -1697,5 +1697,10 @@ namespace TestHik
         }
 
 
+        //REstart Replay
+        private void button16_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

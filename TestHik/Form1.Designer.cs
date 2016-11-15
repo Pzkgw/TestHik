@@ -78,6 +78,7 @@
             this.btnRepImgB = new System.Windows.Forms.Button();
             this.btnRepRec = new System.Windows.Forms.Button();
             this.btnRepSnap = new System.Windows.Forms.Button();
+            this.btnRR = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -553,12 +554,23 @@
             this.btnRepSnap.UseVisualStyleBackColor = true;
             this.btnRepSnap.Click += new System.EventHandler(this.btnRepSnap_Click);
             // 
+            // btnRR
+            // 
+            this.btnRR.Location = new System.Drawing.Point(630, 497);
+            this.btnRR.Name = "btnRR";
+            this.btnRR.Size = new System.Drawing.Size(39, 22);
+            this.btnRR.TabIndex = 45;
+            this.btnRR.Text = "R";
+            this.btnRR.UseVisualStyleBackColor = true;
+            this.btnRR.Click += new System.EventHandler(this.button16_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1143, 606);
+            this.Controls.Add(this.btnRR);
             this.Controls.Add(this.btnRepSnap);
             this.Controls.Add(this.btnRepRec);
             this.Controls.Add(this.btnRepImgB);
@@ -667,6 +679,7 @@
         private System.Windows.Forms.Button btnRepImgB;
         private System.Windows.Forms.Button btnRepRec;
         private System.Windows.Forms.Button btnRepSnap;
+        private System.Windows.Forms.Button btnRR;
     }
 }
 
