@@ -82,9 +82,9 @@ namespace TestHik
             return false;
         }
 
-        private uint GetSeconds(CHCNetSDK.NET_DVR_TIME t)
+        private int GetSeconds(CHCNetSDK.NET_DVR_TIME t)
         {
-            return t.dwHour * 3600 + t.dwMinute * 60 + t.dwSecond;
+            return (int)t.dwHour * 3600 + (int)t.dwMinute * 60 + (int)t.dwSecond;
         }
 
     }

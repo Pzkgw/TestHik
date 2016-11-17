@@ -148,6 +148,7 @@
             // 
             this.textBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox2.Location = new System.Drawing.Point(12, 222);
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
@@ -535,7 +536,7 @@
             this.btnRepBack.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnRepBack.AutoSize = true;
             this.btnRepBack.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnRepBack.Location = new System.Drawing.Point(579, 19);
+            this.btnRepBack.Location = new System.Drawing.Point(600, 19);
             this.btnRepBack.Name = "btnRepBack";
             this.btnRepBack.Size = new System.Drawing.Size(24, 23);
             this.btnRepBack.TabIndex = 41;
@@ -587,7 +588,7 @@
             this.btnRR.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnRR.AutoSize = true;
             this.btnRR.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btnRR.Location = new System.Drawing.Point(507, 19);
+            this.btnRR.Location = new System.Drawing.Point(522, 19);
             this.btnRR.Name = "btnRR";
             this.btnRR.Size = new System.Drawing.Size(25, 23);
             this.btnRR.TabIndex = 45;
@@ -599,6 +600,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.groupBox1.Controls.Add(this.btnRepPause);
             this.groupBox1.Controls.Add(this.btnRepBack);
             this.groupBox1.Controls.Add(this.btnRepImgB);

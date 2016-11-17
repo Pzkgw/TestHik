@@ -137,15 +137,20 @@ namespace TestHik
             }*/
 
             //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
+            if (deft < int.MaxValue) {
+                kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
+                //BeginInvoke(del, "a: " + kkl.ToString() + " b: " + deft.ToString());
+                if ((kkl < uint.MaxValue) && (kkl >= deft)) // most time stop at kkl == deft
+                {
+                    BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + kkl.ToString());
+                    //oo = GetDate(timeDVR).CompareTo(GetDate(struFileData.struStopTime));
+                    //BeginInvoke(del, GetDate(timeDVR).ToString()+"      "+ GetDate(struFileData.struStopTime).ToString());
+                    //(new Thread(() => SetReplay(-2, true))).Start();
 
-            kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
-            BeginInvoke(del, "a: " + kkl.ToString() + " b: " + deft.ToString());
-            if ((kkl < uint.MaxValue) &&
-                (kkl > deft))
-            {
-                BeginInvoke(del, kkl.ToString());
-                //(new Thread(() => SetReplay(-2, true))).Start();
-                Task.Run(() => SetReplay(-2, true));
+                    //struFileCond.struStartTime-struFileData.struStopTime+kkl< 0
+
+                    Task.Run(() => SetReplay(-2, true));
+                }
             }
         }
 

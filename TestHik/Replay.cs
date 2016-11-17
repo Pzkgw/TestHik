@@ -23,14 +23,14 @@ namespace TestHik
         private CHCNetSDK.NET_DVR_TIME timeDVR, timeStart, timeStop;
         private IntPtr timePtr_DVR, m_User;
 
-        CHCNetSDK.NET_DVR_FILECOND_V40 struFileCond;
-        CHCNetSDK.NET_DVR_CERT_PARAM struCertParam;
-        private CHCNetSDK.NET_DVR_VOD_PARA pVodPara; // struct pt NET_DVR_PlayBackByTime_V40
+        //CHCNetSDK.NET_DVR_CERT_PARAM struCertParam;       
+        //CHCNetSDK.NET_DVR_PLAYCOND pPlayCond; // reverse play cond
+        //CHCNetSDK.NET_DVR_PLAYCOND pDownloadCond;
 
-        private CHCNetSDK.NET_DVR_PLAYCOND pPlayCond; // reverse play cond
-        private CHCNetSDK.NET_DVR_PLAYCOND pDownloadCond;
+        CHCNetSDK.NET_DVR_VOD_PARA pVodPara = new CHCNetSDK.NET_DVR_VOD_PARA();
         CHCNetSDK.NET_DVR_FINDDATA_V40 struFileData = new CHCNetSDK.NET_DVR_FINDDATA_V40();
-
+        CHCNetSDK.NET_DVR_FILECOND_V40 struFileCond = new CHCNetSDK.NET_DVR_FILECOND_V40();
+        
         const uint m_rep_oreInMinus = 0; // diferenta de ore, daca exista
         int m_rep_canal = 39;
         int m_rep_setOre = 0; // inregistarea sa inceapa de acum minus m_rep_setOre, m_rep_setMin
@@ -70,6 +70,9 @@ namespace TestHik
             m_rep_CallBack = new CHCNetSDK.PlayDataCallBack_V40(ReplayCallBack);
             m_rep_DisplayCallBack = new fDisplayCallBack_Hik(DisplayCallBack_Hik);
 
+            struFileCond.dwFileType = 0xFF;
+            struFileCond.dwIsLocked = 0xFF;
+            struFileCond.dwUseCardNo = 0;
 
             pVodPara.struIDInfo = new CHCNetSDK.NET_DVR_STREAM_INFO();
             pVodPara.dwSize = (uint)Marshal.SizeOf(pVodPara);
@@ -99,9 +102,6 @@ namespace TestHik
 
 
 
-            struFileCond.dwFileType = 0xFF;
-            struFileCond.dwIsLocked = 0xFF;
-            struFileCond.dwUseCardNo = 0;
 
             // Click InitSDk & Login :
             button2_Click(null, null);
@@ -118,97 +118,109 @@ namespace TestHik
         /// <param name="on">: play :stop </param>
         private void SetReplay(int canal, bool on)
         {
-            lock (repLock)
+
+            if (on)
             {
-                if (on)
+                //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
+
+                SetReplay(-1, false); // stop replay 
+                PlayM4_ResetSourceBuffer(m_repPlayerPort);
+                PlayM4_ResetSourceBufFlag(m_repPlayerPort);
+
+                if (canal != -2)
                 {
-                    SetReplay(-1, false); // stop replay               
+                    //
+                    CloseVideo(); // stop real-play, do eet .. daca e nevoie
 
-                    if (canal != -2)
-                    {
-                        CloseVideo(); // stop real-play, do eet .. daca e nevoie
+                    SetReplayCtrlsVisibility(true, true);
 
-                        SetReplayCtrlsVisibility(true, true);
+                    GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
 
-                        GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
-                    }
-                    else
-                    {
-                        UpDvrDate(GetDate(timeStart).AddSeconds(kkl), ref timeStart);
-                    }
-
-                    FindFiles(((canal == -2) ? (int)pVodPara.struIDInfo.dwChannel : canal));
-
-                    pVodPara.struBeginTime = timeStart;
-                    pVodPara.struEndTime = timeStop;
-                    if (canal != -2) pVodPara.struIDInfo.dwChannel = (uint)canal;
-
-                    pbb = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
-                    //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
-                    //pbb = CHCNetSDK.NET_DVR_PlayBackByName(m_lUserID, struFileData.sFileName, new IntPtr(m_lRealHandle));
-
-                    if (pbb < 0)
-                    {
-                        BeginInvoke(del, "FAILED ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
-                        return;
-                    }
-                    else
-                    {
-                        /*
-                                            IntPtr pUser = new IntPtr();
-
-                                            CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
-
-                                            lpPreviewInfo.lChannel = Convert.ToUInt16(textBox_Ch.Text); //35; // channel number starting from 1 (pentru analogice)
-                                            lpPreviewInfo.dwStreamType = 1; // 0=mainstream, 1=sub-stream
-                                            lpPreviewInfo.dwLinkMode = 0; // 0-tcp, 1-udp, 2-multicast, 3-rtp, 4-rtp/rtps, 5-rstp/http
-                                            lpPreviewInfo.hPlayWnd = IntPtr.Zero;//pictureBox1.Handle;
-                                            lpPreviewInfo.bBlocked = 0; // 0-non-blocking stream, 1-blocking stream;
-                                            //lpPreviewInfo.dwDisplayBufNum = 5;
-
-                                            m_fRealDataCallBack = new CHCNetSDK.REALDATACALLBACK(RealDataCallBack);
-
-                                            m_lRealHandle = CHCNetSDK.NET_DVR_RealPlay_V40(m_lUserID, ref lpPreviewInfo, m_fRealDataCallBack, pUser);
-                        */
-
-                        playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
-                        //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
-
-                        if (playbackStart)
-                        {
-                            m_User = new IntPtr(m_lUserID);
-                            playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(pbb, m_rep_CallBack, m_User);
-
-                        }
-
-                        //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
-
-                    }
-
+                    kanal = canal;
                 }
                 else
                 {
-                    // Stop any ongoing playback
-                    CHCNetSDK.NET_DVR_StopPlayBack(pbb);
 
-                    if (m_repPlayerPort >= 0)
+                    UpDvrDate(GetDate(timeStart).AddSeconds(kkl), ref timeStart);
+
+                    //if (TimeDVRUpdate()) UpDvrDate(GetDate(timeStop).AddDays(1), ref timeStop);
+                }
+
+                FindFiles(((canal == -2) ? (int)pVodPara.struIDInfo.dwChannel : canal));
+
+                pVodPara.struBeginTime = timeStart;
+                UpDvrDate(GetDate(struFileData.struStopTime).AddDays(1), ref pVodPara.struEndTime);
+                if (canal != -2) pVodPara.struIDInfo.dwChannel = (uint)canal;
+
+
+                pbb = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
+                //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
+                //pbb = CHCNetSDK.NET_DVR_PlayBackByName(m_lUserID, struFileData.sFileName, new IntPtr(m_lRealHandle));
+
+                if (pbb < 0)
+                {
+                    BeginInvoke(del, "FAILED ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
+                    return;
+                }
+                else
+                {
+                    /*
+                                        IntPtr pUser = new IntPtr();
+
+                                        CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
+
+                                        lpPreviewInfo.lChannel = Convert.ToUInt16(textBox_Ch.Text); //35; // channel number starting from 1 (pentru analogice)
+                                        lpPreviewInfo.dwStreamType = 1; // 0=mainstream, 1=sub-stream
+                                        lpPreviewInfo.dwLinkMode = 0; // 0-tcp, 1-udp, 2-multicast, 3-rtp, 4-rtp/rtps, 5-rstp/http
+                                        lpPreviewInfo.hPlayWnd = IntPtr.Zero;//pictureBox1.Handle;
+                                        lpPreviewInfo.bBlocked = 0; // 0-non-blocking stream, 1-blocking stream;
+                                        //lpPreviewInfo.dwDisplayBufNum = 5;
+
+                                        m_fRealDataCallBack = new CHCNetSDK.REALDATACALLBACK(RealDataCallBack);
+
+                                        m_lRealHandle = CHCNetSDK.NET_DVR_RealPlay_V40(m_lUserID, ref lpPreviewInfo, m_fRealDataCallBack, pUser);
+                    */
+
+                    playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
+                    //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
+
+                    if (playbackStart)
                     {
-                        PlayM4_Stop(m_repPlayerPort);
-                        /*
-                        PlayM4_CloseStream(m_repPlayerPort);
-                        PlayM4_FreePort(m_repPlayerPort);
-                        if (canal != -1) m_repPlayerPort = -1;*/
+                        m_User = new IntPtr(m_lUserID);
+                        playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(pbb, m_rep_CallBack, m_User);
+
                     }
 
-                    if (canal > 0)
-                    {
-                        SetReplayCtrlsVisibility(false, true);
-                        if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
-                            pictureBox1.BackgroundImageLayout = ImageLayout.Center;
-                        pictureBox1.BackgroundImage = global::TestHik.Properties.Resources.CAVI_square;
-                    }
+                    //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
+
+                }
+
+            }
+            else
+            {
+                // Stop any ongoing playback
+                CHCNetSDK.NET_DVR_StopPlayBack(pbb);
+
+                BeginInvoke(del, "NET_DVR_StopPlayBack: " + m_repPlayerPort.ToString() + " Canal: " + canal.ToString());
+
+                if (m_repPlayerPort >= 0)
+                {
+                    PlayM4_Stop(m_repPlayerPort);
+
+                    PlayM4_CloseStream(m_repPlayerPort);
+                    PlayM4_FreePort(m_repPlayerPort);
+                    //if (canal != -1) m_repPlayerPort = -1;
+                }
+
+                if (canal > 0)
+                {
+                    SetReplayCtrlsVisibility(false, true);
+                    if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
+                        pictureBox1.BackgroundImageLayout = ImageLayout.Center;
+                    pictureBox1.BackgroundImage = global::TestHik.Properties.Resources.CAVI_square;
                 }
             }
+
         }
 
 
@@ -595,7 +607,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
         {
 
             //CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(pbb, m_rep_CallBack, (uint)m_lUserID);
-
+            /*
             pPlayCond.struStartTime = timeStart;
             //pPlayCond.struStartTime.dwHour = (uint)(timpDeReferinta.Hour + m_rep_oreInMinus);
             //pPlayCond.struStartTime.dwMinute = (uint)timpDeReferinta.Minute;
@@ -621,7 +633,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             }
 
             //CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAY_REVERSE, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
-
+            */
             /*
             if (PlayM4_ReversePlay(m_repPlayerPort))  //Start play
             {
@@ -1038,108 +1050,117 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             }
         }
 
+        int deft, kanal;
 
-
-
-
-        uint deft;
-
+        readonly object kkloc = new object();
 
         private void FindFiles(int canal)
         {
-            // caut fisierele existente in intervalul de timp si canalul specificat                       
-
-            struFileCond.lChannel = (uint)canal;
-            struFileCond.struStartTime = timeStart;
-            struFileCond.struStopTime = timeStop;
-            struFileCond.byDrawFrame = 0;
-
-            BeginInvoke(del, "FILES_FROM_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
-
-            struFileData.struStartTime = timeStart;
-            struFileData.struStopTime = timeStop;
-
-            //---------------------------------------
-            //Find record file
-            uint deft1;
-            bool keepTry = true;
-            while (keepTry)
+            // caut fisierele existente in intervalul de timp si canalul specificat 
+            lock (kkloc)
             {
-                // Necesita retry pentru ca mai purcede spre eroarea 7 cateodata:
-                // 7: Failed to connect to the device. The device is off-line, or connection timeout caused by network. 
-                m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
+                struFileCond.lChannel = (uint)kanal; // !!!!!!!!!!!!!!! cum spanac merge asta pe -1 ??????
+                struFileCond.struStartTime = timeStart;
+                struFileCond.struStopTime = timeStop;
+                struFileCond.byDrawFrame = 0;
 
+                int ssdk = GetSeconds(struFileCond.struStartTime);
+                //UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(-16), ref struFileCond.struStartTime); // doar pt NET_DVR_FindFile_V40
 
-                if (m_rep_foundHandle < 0)
+                BeginInvoke(del, "DVRFileSearch_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
+
+                struFileData.struStartTime = timeStart;
+                struFileData.struStopTime = timeStop;
+
+                //---------------------------------------
+                //Find record file
+                bool keepTry = true;
+                uint keepCount = 0;
+                while (keepTry)
                 {
-                    BeginInvoke(del, (string.Format("WARNING: FindFile failed for channel {0}. Last SDK error: {1}", canal, CHCNetSDK.NET_DVR_GetLastError())));
-                }
-                else // jump around cu findNext
-                {
-                    int result = 0;
-                    int nTotalFiles = 0;
+                    deft = int.MaxValue;
 
-                    do
+                    m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
+
+                    if (m_rep_foundHandle < 0)
                     {
-                        result = CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
-
-                        //BeginInvoke(del, "result = " + result.ToString());
-
-                        if (result == CHCNetSDK.NET_DVR_ISFINDING)
+                        uint err = CHCNetSDK.NET_DVR_GetLastError();
+                        BeginInvoke(del, (string.Format("WARNING: FindFile failed for channel {0}. Last SDK error: {1}", canal, err)));
+                        if (err == 46) // The number of login or preview connections has exceeded the SDK limitation.
                         {
-                            continue;
-                        }
-                        else
-                        if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
-                        {
-                            BeginInvoke(del, struFileData.sFileName +
-                                "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
-
-                            //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
-                            deft = uint.MaxValue;
-                            if ((GetSeconds(timeStart) + 8) < GetSeconds(struFileData.struStopTime))
-                            {
-                                deft = GetSeconds(struFileData.struStopTime);
-                                deft1 = GetSeconds(timeStart);
-                                if (deft >= deft1)
-                                {
-                                    deft = deft - deft1;
-                                    //if (deft > 3) deft = 0;
-
-                                }
-                                else
-                                {
-                                    deft = uint.MaxValue;
-                                }
-                                keepTry = false;
-                            }
-                            ++nTotalFiles;
-                        }
-                        else
-                        {
-                            if (result == CHCNetSDK.NET_DVR_FILE_NOFIND || result == CHCNetSDK.NET_DVR_NOMOREFILE)
-                            {
-                                //MessageBox.Show("No (more) files for this channel!");
-                            }
-                            else
-                            {
-                                //MessageBox.Show(string.Format("Unable to FindNextFile() due to a unknown state! NET SDK err = {0}", CHCNetSDK.NET_DVR_GetLastError()));
-                            }
+                            keepTry = false;
                             break;
                         }
 
-                    } while (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING);
+                        // ToDO: check pentru 7
+                        // 7: Failed to connect to the device. The device is off-line, or connection timeout caused by network.
+                    }
+                    else // jump around cu findNext
+                    {
+                        int result = 0;
+                        int nTotalFiles = 0;
 
+                        do
+                        {
 
-                    //BeginInvoke(del, "FILES TOTAL NR: " + nTotalFiles.ToString());
+                            result = CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
 
+                            //BeginInvoke(del, "result = " + result.ToString());
+
+                            if (result == CHCNetSDK.NET_DVR_ISFINDING)
+                            {
+                                continue;
+                            }
+                            else
+                            if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
+                            {
+                                BeginInvoke(del, struFileData.sFileName +
+                                    "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
+
+                                //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
+
+                                if ((ssdk + 1) < GetSeconds(struFileData.struStopTime))
+                                {
+                                    keepTry = false;
+                                }
+                                else
+                                {
+                                    UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(-1), ref struFileCond.struStartTime);
+                                    ssdk -= 1;
+                                    result = -1; // one more try
+                                }
+
+                                ++nTotalFiles;
+                            }
+                            else//NET_DVR_FILE_NOFIND || NET_DVR_NOMOREFILE ||NET_DVR_FILE_EXCEPTION
+                            {
+                                Thread.Sleep(1);
+                                result = -1; // one more try
+                            }
+
+                        } while (result >= 0 && (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING));
+
+                    }
+
+                    if (keepTry)
+                    {
+                        if (++keepCount == uint.MaxValue) keepTry = false;
+                        else Thread.Sleep(1);
+                    }
+                    else
+                    {
+                        deft = (GetSeconds(struFileData.struStopTime) - (ssdk)) - 1;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
+                    }
                 }
+
+                // Stop finding
+                if (m_rep_foundHandle >= 0)
+                    if (!CHCNetSDK.NET_DVR_FindClose_V30(m_rep_foundHandle))
+                    {
+                        BeginInvoke(del, "FAIL at NET_DVR_FindClose_V30");
+                    }
+
             }
-
-            // Stop finding
-            CHCNetSDK.NET_DVR_FindClose_V30(m_rep_foundHandle);
-
-
         }
 
 
