@@ -1094,6 +1094,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             keepTry = true, // loop de incercari
             oneMoreTry = false; // in case of error, 1 more try from file start
             uint keepCount = 0;
+            int playSecDiff = 7;// diferenta de secunde la care incepe play
             while (keepTry || oneMoreTry)
             {
                 deft = int.MaxValue;
@@ -1148,7 +1149,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
                             if (ssdk <= ssdk1)
                             {
-                                if ((ssdk + 3) < ssdk1)
+                                if ((ssdk + playSecDiff) < ssdk1)
                                 {
                                     keepTry = false;
 
@@ -1194,7 +1195,11 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                             oneMoreTry = true;
                         }
                     }
-                    else Thread.Sleep(1);
+                    else
+                    {
+                        Thread.Sleep(1);
+                        if (keepCount % 10 == 0 && playSecDiff > 0) --playSecDiff;
+                    }
                 }
                 else
                 {
