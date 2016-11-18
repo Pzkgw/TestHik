@@ -60,8 +60,7 @@ namespace TestHik
         [DllImport("Filters.dll", SetLastError = true, EntryPoint = "YV12ToBGR24", CallingConvention = CallingConvention.Cdecl)]
         private unsafe static extern int YV12ToBGR24(byte* pSource, int nSourceSize, byte* pDest, int nWidth, int nHeight);//
 
-        int cf = 0;
-
+        
         //readonly object lo1 = new object(), lo2 = new object(), lo3 = new object();
         // callback pentru receptionarea frame-urilor (in format YV12)
         public delegate void fDisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved);
@@ -77,7 +76,7 @@ namespace TestHik
                  + Environment.NewLine + "BUF_VIDEO_DECODED: " + PlayM4_GetBufferValue(nPort, 5).ToString());
                  */
 
-            //lock (lo2)
+            //if(data.playSecondsCur != data.playSecondsPre)
             {
                 if (nType == 3 && (nSize > 0) && (nPort >= 0) && ((nWidth * nHeight * 3) == (nSize * 2)))
                 {
@@ -126,36 +125,30 @@ namespace TestHik
                 }
             }
 
-
-            /*
-            ++cf;
-            if(cf == 16)
-            {
-                PlayM4_ResetSourceBufFlag(m_repPlayerPort);
-                //PlayM4_ResetSourceBuffer(m_repPlayerPort);
-                cf = 0;
-            }*/
-
             //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
             if (deft < int.MaxValue) {
-                kkl = PlayM4_GetPlayedTime(m_repPlayerPort);
-                //BeginInvoke(del, "a: " + kkl.ToString() + " b: " + deft.ToString());
-                if ((kkl < uint.MaxValue) && (kkl >= deft)) // most time stop at kkl == deft
+                data.playSecondsPre = data.playSecondsCur;
+                data.playSecondsCur = PlayM4_GetPlayedTime(nPort);
+                if ((deft - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + deft.ToString());
+                if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > 4199500) || (data.playSecondsCur >= deft))) // most time stop at kkl == deft
                 {
-                    BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + kkl.ToString());
+                    //4294967295
+                    //4199585
+                    // (kkl > 4199500) tine de dimensiunea maxima a fisierelor sau erori la PlayM4_GetPlayedTime
+                    BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + data.playSecondsCur.ToString());
                     //oo = GetDate(timeDVR).CompareTo(GetDate(struFileData.struStopTime));
                     //BeginInvoke(del, GetDate(timeDVR).ToString()+"      "+ GetDate(struFileData.struStopTime).ToString());
                     //(new Thread(() => SetReplay(-2, true))).Start();
 
                     //struFileCond.struStartTime-struFileData.struStopTime+kkl< 0
 
+                    //PlayM4_ResetSourceBuffer(nPort);
+                    //PlayM4_ResetSourceBufFlag(nPort);
                     Task.Run(() => SetReplay(-2, true));
                 }
             }
         }
-
-
-        uint kkl = 0;
+        
 
 
         public void LoginResultCallBack(int lUserID, int dwResult, ref CHCNetSDK.NET_DVR_DEVICEINFO_V30 lpDeviceInfo, IntPtr pUser)
@@ -1705,7 +1698,8 @@ namespace TestHik
         //REstart Replay
         private void button16_Click(object sender, EventArgs e)
         {
-
+            SetReplay(-3, true);
         }
+
     }
 }

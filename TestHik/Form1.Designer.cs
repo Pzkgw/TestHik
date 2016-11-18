@@ -80,8 +80,11 @@
             this.btnRepSnap = new System.Windows.Forms.Button();
             this.btnRR = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.txtRepZile = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -405,18 +408,18 @@
             // 
             // button15
             // 
-            this.button15.Location = new System.Drawing.Point(363, 164);
+            this.button15.Location = new System.Drawing.Point(158, 8);
             this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(111, 33);
+            this.button15.Size = new System.Drawing.Size(113, 33);
             this.button15.TabIndex = 28;
-            this.button15.Text = "Instant Replay";
+            this.button15.Text = "Start";
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
             // txtRepCh
             // 
             this.txtRepCh.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepCh.Location = new System.Drawing.Point(282, 146);
+            this.txtRepCh.Location = new System.Drawing.Point(96, 18);
             this.txtRepCh.Name = "txtRepCh";
             this.txtRepCh.Size = new System.Drawing.Size(28, 13);
             this.txtRepCh.TabIndex = 29;
@@ -426,9 +429,9 @@
             // txtRepOre
             // 
             this.txtRepOre.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepOre.Location = new System.Drawing.Point(282, 200);
+            this.txtRepOre.Location = new System.Drawing.Point(166, 52);
             this.txtRepOre.Name = "txtRepOre";
-            this.txtRepOre.Size = new System.Drawing.Size(28, 13);
+            this.txtRepOre.Size = new System.Drawing.Size(20, 13);
             this.txtRepOre.TabIndex = 30;
             this.txtRepOre.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtRepOre.TextChanged += new System.EventHandler(this.txtRepOre_TextChanged);
@@ -436,9 +439,9 @@
             // txtRepMin
             // 
             this.txtRepMin.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepMin.Location = new System.Drawing.Point(282, 172);
+            this.txtRepMin.Location = new System.Drawing.Point(245, 52);
             this.txtRepMin.Name = "txtRepMin";
-            this.txtRepMin.Size = new System.Drawing.Size(28, 13);
+            this.txtRepMin.Size = new System.Drawing.Size(20, 13);
             this.txtRepMin.TabIndex = 31;
             this.txtRepMin.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.txtRepMin.TextChanged += new System.EventHandler(this.txtRepMin_TextChanged);
@@ -446,38 +449,38 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(192, 146);
+            this.label5.Location = new System.Drawing.Point(41, 18);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(84, 13);
+            this.label5.Size = new System.Drawing.Size(49, 13);
             this.label5.TabIndex = 32;
-            this.label5.Text = "Replay channel:";
+            this.label5.Text = "Channel:";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(237, 172);
+            this.label6.Location = new System.Drawing.Point(56, 52);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(39, 13);
+            this.label6.Size = new System.Drawing.Size(34, 13);
             this.label6.TabIndex = 33;
-            this.label6.Text = "acum :";
+            this.label6.Text = "Days:";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(316, 172);
+            this.label8.Location = new System.Drawing.Point(192, 52);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(38, 13);
+            this.label8.Size = new System.Drawing.Size(47, 13);
             this.label8.TabIndex = 35;
-            this.label8.Text = "minute";
+            this.label8.Text = "Minutes:";
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(316, 198);
+            this.label9.Location = new System.Drawing.Point(122, 52);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(22, 13);
+            this.label9.Size = new System.Drawing.Size(38, 13);
             this.label9.TabIndex = 36;
-            this.label9.Text = "ore";
+            this.label9.Text = "Hours:";
             // 
             // btnRepPause
             // 
@@ -616,21 +619,41 @@
             this.groupBox1.TabIndex = 46;
             this.groupBox1.TabStop = false;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.txtRepZile);
+            this.groupBox2.Controls.Add(this.label5);
+            this.groupBox2.Controls.Add(this.txtRepCh);
+            this.groupBox2.Controls.Add(this.label9);
+            this.groupBox2.Controls.Add(this.txtRepMin);
+            this.groupBox2.Controls.Add(this.label6);
+            this.groupBox2.Controls.Add(this.label8);
+            this.groupBox2.Controls.Add(this.button15);
+            this.groupBox2.Controls.Add(this.txtRepOre);
+            this.groupBox2.Location = new System.Drawing.Point(205, 141);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(271, 75);
+            this.groupBox2.TabIndex = 47;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Replay";
+            // 
+            // txtRepZile
+            // 
+            this.txtRepZile.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtRepZile.Location = new System.Drawing.Point(96, 52);
+            this.txtRepZile.Name = "txtRepZile";
+            this.txtRepZile.Size = new System.Drawing.Size(20, 13);
+            this.txtRepZile.TabIndex = 37;
+            this.txtRepZile.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(1143, 606);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.txtRepMin);
-            this.Controls.Add(this.txtRepOre);
-            this.Controls.Add(this.txtRepCh);
-            this.Controls.Add(this.button15);
             this.Controls.Add(this.button14);
             this.Controls.Add(this.button13);
             this.Controls.Add(this.textBoxLastFrame);
@@ -669,6 +692,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -727,6 +752,8 @@
         private System.Windows.Forms.Button btnRepSnap;
         private System.Windows.Forms.Button btnRR;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.TextBox txtRepZile;
     }
 }
 
