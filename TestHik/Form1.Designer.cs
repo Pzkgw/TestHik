@@ -419,7 +419,7 @@
             // txtRepCh
             // 
             this.txtRepCh.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepCh.Location = new System.Drawing.Point(96, 18);
+            this.txtRepCh.Location = new System.Drawing.Point(60, 28);
             this.txtRepCh.Name = "txtRepCh";
             this.txtRepCh.Size = new System.Drawing.Size(28, 13);
             this.txtRepCh.TabIndex = 29;
@@ -429,7 +429,7 @@
             // txtRepOre
             // 
             this.txtRepOre.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepOre.Location = new System.Drawing.Point(166, 52);
+            this.txtRepOre.Location = new System.Drawing.Point(130, 52);
             this.txtRepOre.Name = "txtRepOre";
             this.txtRepOre.Size = new System.Drawing.Size(20, 13);
             this.txtRepOre.TabIndex = 30;
@@ -439,7 +439,7 @@
             // txtRepMin
             // 
             this.txtRepMin.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepMin.Location = new System.Drawing.Point(245, 52);
+            this.txtRepMin.Location = new System.Drawing.Point(209, 52);
             this.txtRepMin.Name = "txtRepMin";
             this.txtRepMin.Size = new System.Drawing.Size(20, 13);
             this.txtRepMin.TabIndex = 31;
@@ -449,7 +449,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(41, 18);
+            this.label5.Location = new System.Drawing.Point(5, 28);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(49, 13);
             this.label5.TabIndex = 32;
@@ -458,7 +458,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(56, 52);
+            this.label6.Location = new System.Drawing.Point(20, 52);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(34, 13);
             this.label6.TabIndex = 33;
@@ -467,7 +467,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(192, 52);
+            this.label8.Location = new System.Drawing.Point(156, 52);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(47, 13);
             this.label8.TabIndex = 35;
@@ -476,7 +476,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(122, 52);
+            this.label9.Location = new System.Drawing.Point(86, 52);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(38, 13);
             this.label9.TabIndex = 36;
@@ -640,11 +640,12 @@
             // txtRepZile
             // 
             this.txtRepZile.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtRepZile.Location = new System.Drawing.Point(96, 52);
+            this.txtRepZile.Location = new System.Drawing.Point(60, 52);
             this.txtRepZile.Name = "txtRepZile";
             this.txtRepZile.Size = new System.Drawing.Size(20, 13);
             this.txtRepZile.TabIndex = 37;
             this.txtRepZile.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.txtRepZile.TextChanged += new System.EventHandler(this.txtRepZile_TextChanged);
             // 
             // Form1
             // 

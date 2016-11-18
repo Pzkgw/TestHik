@@ -62,7 +62,7 @@ namespace TestHik
             t.dwSecond = (uint)d.Second;
         }
 
-        private bool GetReplayTimeInterval(int sOre, int sMinute, ref CHCNetSDK.NET_DVR_TIME startTime, ref CHCNetSDK.NET_DVR_TIME stopTime)
+        private bool GetReplayTimeInterval(int sDays, int sOre, int sMinute, ref CHCNetSDK.NET_DVR_TIME startTime, ref CHCNetSDK.NET_DVR_TIME stopTime)
         {
             if (TimeDVRUpdate())
             {

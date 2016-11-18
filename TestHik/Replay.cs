@@ -35,6 +35,7 @@ namespace TestHik
         int m_rep_canal = 39;
         int m_rep_setOre = 0; // inregistarea sa inceapa de acum minus m_rep_setOre, m_rep_setMin
         int m_rep_setMin = 2;
+        int m_rep_setDays = 0;
         int m_rep_foundHandle = -5; // record file pentru
         //int m_repPath; // 1:play 2:stop 3:reverse 30: fast forward
         const int bufferSize = 6 * 1024 * 1024;
@@ -67,6 +68,7 @@ namespace TestHik
             txtRepCh.Text = m_rep_canal.ToString();
             txtRepOre.Text = m_rep_setOre.ToString();
             txtRepMin.Text = m_rep_setMin.ToString();
+            txtRepZile.Text = m_rep_setDays.ToString();
 
             m_rep_CallBack = new CHCNetSDK.PlayDataCallBack_V40(ReplayCallBack);
             m_rep_DisplayCallBack = new fDisplayCallBack_Hik(DisplayCallBack_Hik);
@@ -138,7 +140,7 @@ namespace TestHik
 
                         SetReplayCtrlsVisibility(true, true);
 
-                        GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
+                        GetReplayTimeInterval(m_rep_setDays, m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
 
                         data = new ReplayData();
                         data.canal = canal;                        
@@ -568,6 +570,11 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
         private void txtRepOre_TextChanged(object sender, EventArgs e)
         {
             int.TryParse(txtRepOre.Text, out m_rep_setOre);
+        }
+
+        private void txtRepZile_TextChanged(object sender, EventArgs e)
+        {
+            int.TryParse(txtRepZile.Text, out m_rep_setDays);
         }
 
         private void btnPause_Click(object sender, EventArgs e)
@@ -1094,9 +1101,10 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             keepTry = true, // loop de incercari
             oneMoreTry = false; // in case of error, 1 more try from file start
             uint keepCount = 0;
-            int playSecDiff = 7;// diferenta de secunde la care incepe play
+            int playSecDiff = 6; // diferenta de secunde la care incepe play
             while (keepTry || oneMoreTry)
             {
+                BeginInvoke(del, "keepTry:"+ playSecDiff.ToString());
                 deft = int.MaxValue;
 
                 if (oneMoreTry)
@@ -1198,7 +1206,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                     else
                     {
                         Thread.Sleep(1);
-                        if (keepCount % 10 == 0 && playSecDiff > 0) --playSecDiff;
+                        if (keepCount % 7 == 0 && playSecDiff > 0) --playSecDiff;
                     }
                 }
                 else
