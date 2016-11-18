@@ -77,6 +77,7 @@ namespace TestHik
                  */
 
             //if(data.playSecondsCur != data.playSecondsPre)
+            if (data.achievement_PlaybackStarted)
             {
                 if (nType == 3 && (nSize > 0) && (nPort >= 0) && ((nWidth * nHeight * 3) == (nSize * 2)))
                 {
@@ -123,28 +124,30 @@ namespace TestHik
                     pictureBox1.BackgroundImage = bitmap;
 
                 }
-            }
 
-            //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
-            if (deft < int.MaxValue) {
-                data.playSecondsPre = data.playSecondsCur;
-                data.playSecondsCur = PlayM4_GetPlayedTime(nPort);
-                if ((deft - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + deft.ToString());
-                if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > 4199500) || (data.playSecondsCur >= deft))) // most time stop at kkl == deft
+
+                //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
+                if (deft < int.MaxValue)
                 {
-                    //4294967295
-                    //4199585
-                    // (kkl > 4199500) tine de dimensiunea maxima a fisierelor sau erori la PlayM4_GetPlayedTime
-                    BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + data.playSecondsCur.ToString());
-                    //oo = GetDate(timeDVR).CompareTo(GetDate(struFileData.struStopTime));
-                    //BeginInvoke(del, GetDate(timeDVR).ToString()+"      "+ GetDate(struFileData.struStopTime).ToString());
-                    //(new Thread(() => SetReplay(-2, true))).Start();
+                    data.playSecondsPre = data.playSecondsCur;
+                    data.playSecondsCur = PlayM4_GetPlayedTime(nPort);
+                    if ((deft - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + deft.ToString());
+                    if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > 4199500) || (data.playSecondsCur >= deft))) // most time stop at kkl == deft
+                    {
+                        //4294967295
+                        //4199585
+                        // (kkl > 4199500) tine de dimensiunea maxima a fisierelor sau erori la PlayM4_GetPlayedTime
+                        BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + data.playSecondsCur.ToString());
+                        //oo = GetDate(timeDVR).CompareTo(GetDate(struFileData.struStopTime));
+                        //BeginInvoke(del, GetDate(timeDVR).ToString()+"      "+ GetDate(struFileData.struStopTime).ToString());
+                        //(new Thread(() => SetReplay(-2, true))).Start();
 
-                    //struFileCond.struStartTime-struFileData.struStopTime+kkl< 0
+                        //struFileCond.struStartTime-struFileData.struStopTime+kkl< 0
 
-                    //PlayM4_ResetSourceBuffer(nPort);
-                    //PlayM4_ResetSourceBufFlag(nPort);
-                    Task.Run(() => SetReplay(-2, true));
+                        //PlayM4_ResetSourceBuffer(nPort);
+                        //PlayM4_ResetSourceBufFlag(nPort);
+                        Task.Run(() => SetReplay(-2, true));
+                    }
                 }
             }
         }

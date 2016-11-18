@@ -4,9 +4,10 @@ namespace TestHik
 {
     class ReplayData
     {
-        public bool startBusy;
-        public bool running;
-        public bool paused;
+        public bool achievement_FileFound;
+        public bool achievement_PlaybackStarted;
+
+        public int speed; // 0:  pause, 1: running, 2: fast forward
 
         public int canal;
         public uint playSecondsPre = 666; //    last played seconds value

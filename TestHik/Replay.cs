@@ -50,7 +50,7 @@ namespace TestHik
         bool imgBool; // Image loop return value
         bool imgLoop; // ImageLoopTrueOrFalse
         uint LPOutValue = 0; // PlayBackControl return value by ref        
-        bool playbackStart; // SetPlayDataCallBack return value
+        
 
         bool m_repPlayOrPause;
 
@@ -121,9 +121,11 @@ namespace TestHik
             {
                 if (on)
                 {
+                    
                     //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
                     if (data != null)
                     {
+                        data.achievement_PlaybackStarted = false;
                         SetReplay(-1, false); // stop replay 
                         PlayM4_ResetSourceBuffer(m_repPlayerPort);
                         PlayM4_ResetSourceBufFlag(m_repPlayerPort);
@@ -139,8 +141,7 @@ namespace TestHik
                         GetReplayTimeInterval(m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
 
                         data = new ReplayData();
-                        data.canal = canal;
-                        data.startBusy = true;
+                        data.canal = canal;                        
                         data.type = 0;
                         data.timeStartA = GetDate(timeStart);
                         data.timeStartB = data.timeStartA;
@@ -197,7 +198,7 @@ namespace TestHik
 
                                             m_lRealHandle = CHCNetSDK.NET_DVR_RealPlay_V40(m_lUserID, ref lpPreviewInfo, m_fRealDataCallBack, pUser);
                         */
-
+                        bool playbackStart; // SetPlayDataCallBack return value
                         playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(data.handle, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
                         //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
 
@@ -206,10 +207,10 @@ namespace TestHik
                             m_User = new IntPtr(m_lUserID);
                             playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(data.handle, m_rep_CallBack, m_User);
 
+                            data.achievement_PlaybackStarted = playbackStart;
                         }
 
                         //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
-
                     }
 
                 }
@@ -1063,6 +1064,8 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
         // DVR file in intervalul de timp, pentru canalul specificat 
         private void FindFiles(ReplayData info)
         {
+            info.achievement_FileFound = false;
+
             if (info.type == 1 &&
                 info.playSecondsCur > uint.MinValue && info.playSecondsCur < uint.MaxValue)
                 UpDvrDate(GetDate(timeStart).AddSeconds(info.playSecondsCur), ref timeStart);
@@ -1140,10 +1143,10 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                             ssdk1 = GetSeconds(struFileData.struStopTime);
                             BeginInvoke(del, struFileData.sFileName +
                                 "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
-
+                            BeginInvoke(del, "ssdk: " + ssdk.ToString() + "ssdk1: " + ssdk1.ToString());
                             //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
 
-                            if (ssdk < ssdk1)
+                            if (ssdk <= ssdk1)
                             {
                                 if ((ssdk + 3) < ssdk1)
                                 {
@@ -1151,17 +1154,19 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
                                     info.fileName = struFileData.sFileName;
                                     info.timeStartB = GetDate(struFileData.struStartTime);
+                                    info.achievement_FileFound = true;
                                     CloseFileFind();
                                 }
                                 else
                                 {
-                                    if (struFileData.struStartTime.dwSecond == struFileCond.struStopTime.dwSecond)
+                                    if (ssdk == ssdk1)
                                     {
                                         BeginInvoke(del, "_ssdk TEST failed: " + struFileCond.struStartTime.dwSecond.ToString());
 
                                         UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(1), ref struFileCond.struStartTime);
                                         UpDvrDate(GetDate(struFileData.struStartTime).AddSeconds(1), ref struFileData.struStartTime);
                                     }
+
                                     CloseFileFind();
                                     result = -5; // one more try                                    
                                 }
