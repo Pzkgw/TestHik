@@ -10,7 +10,7 @@ namespace TestHik
     public partial class Form1 : Form
     {
         //struct FRAME_POS { long nFilePos; long nFrameNum; long nFrameTime; };
-        public delegate void funVerify(int nPort, IntPtr pFilePos,  uint bIsVideo, uint nUser);
+        public delegate void funVerify(int nPort, IntPtr pFilePos, uint bIsVideo, uint nUser);
 
         public delegate void FileEndCallback(int nPort, IntPtr pUser);
 
@@ -60,6 +60,16 @@ namespace TestHik
             t.dwHour = (uint)d.Hour;
             t.dwMinute = (uint)d.Minute;
             t.dwSecond = (uint)d.Second;
+        }
+
+        private void UpDvrDate(CHCNetSDK.NET_DVR_TIME t0, ref CHCNetSDK.NET_DVR_TIME t)
+        {
+            t.dwYear = t0.dwYear;
+            t.dwMonth = t0.dwMonth;
+            t.dwDay = t0.dwDay;
+            t.dwHour = t0.dwHour;
+            t.dwMinute = t0.dwMinute;
+            t.dwSecond = t0.dwSecond;
         }
 
         private bool GetReplayTimeInterval(int sDays, int sOre, int sMinute, ref CHCNetSDK.NET_DVR_TIME startTime, ref CHCNetSDK.NET_DVR_TIME stopTime)

@@ -1098,13 +1098,14 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             bool
             tryLoop = true, // loop de incercari
             oneMoreTry = false, // in case of error, 1 more try from file start
-            foundAtLeastOneFile = false;
+            foundAtLeastOneFile = false,
+            oneFileChangeOccured = false; // true after one file has changed due to buffers
             uint keepCount = 0;
             int playSecDiff = ReplaySettings.TimeIntervalUpdate.startValue; // diferenta de secunde la care incepe play
             while (tryLoop || oneMoreTry)
             {
                 //BeginInvoke(del, "keepTry:" + playSecDiff.ToString());
-                Thread.Sleep(1);
+                //Thread.Sleep(1);
                 info.playTimeContinous = int.MaxValue;
 
                 if (oneMoreTry)
@@ -1149,13 +1150,17 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                         else
                         if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
                         {
+                            if (oneFileChangeOccured && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
                             t2 = GetSeconds(struFileData.struStopTime);
+
                             if (info.timeInSecondsB != t2)
                             {
                                 info.timeInSecondsB = t2;
+                                oneFileChangeOccured = true;
+
                                 BeginInvoke(del, struFileData.sFileName +
                                     "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
-                                BeginInvoke(del, "t1: " + t1.ToString() + " t2: " + t2.ToString());
+                                //BeginInvoke(del, "t1: " + t1.ToString() + " t2: " + t2.ToString());
                                 //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
 
                                 if (t1 <= t2)
@@ -1174,7 +1179,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                                     {
                                         if (playSecDiff <= 3)
                                         {
-                                            BeginInvoke(del, "_ssdk TEST failed: " + struFileCond.struStartTime.dwSecond.ToString());
+                                            BeginInvoke(del, "Start time re-think: " + struFileCond.struStartTime.dwSecond.ToString());
 
                                             UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(1), ref struFileCond.struStartTime);
                                             UpDvrDate(GetDate(struFileData.struStartTime).AddSeconds(1), ref struFileData.struStartTime);
@@ -1214,17 +1219,19 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                             oneMoreTry = true;
                         }
                     }
-                    else
-                    {
-                        if (info.timeInSecondsB != t2 && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
-                    }
                 }
                 else
                 {
                     if (foundAtLeastOneFile)
                     {
                         // struFileData e cu o zi in viitor dar GetSeconds se uita doar la Time
-                        info.playTimeContinous = GetSeconds(struFileData.struStopTime) - t1 - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
+                        info.playTimeContinous = t2 - t1 - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
+
+                        int startDiff = GetSeconds(struFileData.struStartTime) - t1;
+                        if (startDiff > 0) // regula (play start time >= inceputul fisierului) nu e respectata
+                        {
+                            UpDvrDate(struFileData.struStartTime, ref struFileCond.struStartTime);
+                        }
                     }
                     else
                     {

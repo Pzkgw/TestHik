@@ -126,7 +126,7 @@ namespace TestHik
                     data.achievement_FirstFrameHasAppeared = true;
                 }
 
-                
+
                 //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
                 if (data != null && data.playTimeContinous < int.MaxValue)
                 {
