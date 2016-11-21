@@ -17,6 +17,7 @@ namespace TestHik
         public string fileName;
         public DateTime timeStartA; // timpul de start pentru tot intervalul
         public DateTime timeStartB; // timpul de start al fisierului curent
+        public int timeInSecondsB = -2; // timpul de stop(nu si data), in secunde
 
         public byte type; // 0 - play, 1 - restart for next-file-continue, 2 - restart from begin
         public int handle; // play handle, PlayBackByTime return value 
@@ -32,6 +33,7 @@ namespace TestHik
             public const int retryAfterFrames = 3; // after each retryAfterFrames, stop time receives interval update, a different retry
         }
 
+        public const int maxFileFindLoops = 0x100;  // de cate ori de incearca gasirea fisierului pe interval
         public const int maxFileTimePlay = 4199500; // valoarea maxima din teste pentru PlayM4_GetPlayedTime
     }
 }

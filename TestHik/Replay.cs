@@ -1085,7 +1085,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             struFileCond.struStopTime = timeStop;
             struFileCond.byDrawFrame = 0;
 
-            int t1 = GetSeconds(struFileCond.struStartTime), t2 = -1, t3 = -2;
+            int t1 = GetSeconds(struFileCond.struStartTime), t2 = -1;
             //UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(-16), ref struFileCond.struStartTime); // doar pt NET_DVR_FindFile_V40
 
             BeginInvoke(del, "DVRFileSearch_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
@@ -1150,9 +1150,9 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                         if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
                         {
                             t2 = GetSeconds(struFileData.struStopTime);
-                            if (t3 != t2)
+                            if (info.timeInSecondsB != t2)
                             {
-                                t3 = t2;
+                                info.timeInSecondsB = t2;
                                 BeginInvoke(del, struFileData.sFileName +
                                     "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
                                 BeginInvoke(del, "t1: " + t1.ToString() + " t2: " + t2.ToString());
@@ -1204,26 +1204,32 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
                 if (tryLoop)
                 {
-                    if (++keepCount == uint.MaxValue)
+                    if (++keepCount > ReplaySettings.maxFileFindLoops)
                     {
                         BeginInvoke(del, "FINAL de incercari");
                         if (!oneMoreTry)
                         {
                             tryLoop = false;
+                            keepCount = 0; //]
                             oneMoreTry = true;
                         }
                     }
                     else
                     {
-                        if (t3 != t2 && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
+                        if (info.timeInSecondsB != t2 && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
                     }
                 }
                 else
                 {
                     if (foundAtLeastOneFile)
+                    {
                         // struFileData e cu o zi in viitor dar GetSeconds se uita doar la Time
                         info.playTimeContinous = GetSeconds(struFileData.struStopTime) - t1 - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
-                                                                              //ssdk = GetSeconds(struFileCond.struStartTime)
+                    }
+                    else
+                    {
+                        BeginInvoke(del, "E gaura ... nu am gasit nimic !");
+                    }
                 }
             }
 
