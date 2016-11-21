@@ -9,7 +9,7 @@ namespace TestHik
 {
     public partial class Form1 : Form
     {
-        struct FRAME_POS { long nFilePos; long nFrameNum; long nFrameTime; };
+        //struct FRAME_POS { long nFilePos; long nFrameNum; long nFrameTime; };
         public delegate void funVerify(int nPort, IntPtr pFilePos,  uint bIsVideo, uint nUser);
 
         public delegate void FileEndCallback(int nPort, IntPtr pUser);

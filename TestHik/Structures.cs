@@ -4,8 +4,9 @@ namespace TestHik
 {
     class ReplayData
     {
-        public bool achievement_FileFound;
+        public bool achievement_FileHasBeenFound;
         public bool achievement_PlaybackStarted;
+        public bool achievement_FirstFrameHasAppeared;
 
         public int speed; // 0:  pause, 1: running, 2: fast forward
 
@@ -19,5 +20,18 @@ namespace TestHik
 
         public byte type; // 0 - play, 1 - restart for next-file-continue, 2 - restart from begin
         public int handle; // play handle, PlayBackByTime return value 
+
+        public int playTimeContinous; // play time in seconds until the DVR file end will be reached
+    }
+
+    struct ReplaySettings
+    {
+        public struct TimeIntervalUpdate
+        {
+            public const int startValue = 7; // maximum start difference in second between wanted interval and DVR file stop time  
+            public const int retryAfterFrames = 3; // after each retryAfterFrames, stop time receives interval update, a different retry
+        }
+
+        public const int maxFileTimePlay = 4199500; // valoarea maxima din teste pentru PlayM4_GetPlayedTime
     }
 }

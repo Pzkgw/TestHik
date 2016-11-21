@@ -60,7 +60,7 @@ namespace TestHik
         [DllImport("Filters.dll", SetLastError = true, EntryPoint = "YV12ToBGR24", CallingConvention = CallingConvention.Cdecl)]
         private unsafe static extern int YV12ToBGR24(byte* pSource, int nSourceSize, byte* pDest, int nWidth, int nHeight);//
 
-        
+
         //readonly object lo1 = new object(), lo2 = new object(), lo3 = new object();
         // callback pentru receptionarea frame-urilor (in format YV12)
         public delegate void fDisplayCallBack_Hik(int nPort, IntPtr pBuf, int nSize, int nWidth, int nHeight, int nStamp, int nType, int nReserved);
@@ -77,7 +77,7 @@ namespace TestHik
                  */
 
             //if(data.playSecondsCur != data.playSecondsPre)
-            if (data.achievement_PlaybackStarted)
+            if (data == null || (data != null && data.achievement_PlaybackStarted)) // null data e test pt playback
             {
                 if (nType == 3 && (nSize > 0) && (nPort >= 0) && ((nWidth * nHeight * 3) == (nSize * 2)))
                 {
@@ -123,26 +123,30 @@ namespace TestHik
                         pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
                     pictureBox1.BackgroundImage = bitmap;
 
+                    data.achievement_FirstFrameHasAppeared = true;
                 }
 
-
+                
                 //CHCNetSDK.NET_DVR_RefreshPlay(pbb);
-                if (deft < int.MaxValue)
+                if (data != null && data.playTimeContinous < int.MaxValue)
                 {
                     data.playSecondsPre = data.playSecondsCur;
                     data.playSecondsCur = PlayM4_GetPlayedTime(nPort);
-                    if ((deft - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + deft.ToString());
-                    if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > 4199500) || (data.playSecondsCur >= deft))) // most time stop at kkl == deft
+                    if ((data.playTimeContinous - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + data.playTimeContinous.ToString());
+                    if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > ReplaySettings.maxFileTimePlay) || (data.playSecondsCur >= data.playTimeContinous))) // most time stop at kkl == deft
                     {
                         //4294967295
                         //4199585
                         // (kkl > 4199500) tine de dimensiunea maxima a fisierelor sau erori la PlayM4_GetPlayedTime
-                        BeginInvoke(del, "Task.Run.Replay: " + deft.ToString() + "|" + data.playSecondsCur.ToString());
+                        BeginInvoke(del, "Task.Run.Replay: " + data.playTimeContinous.ToString() + " | " + data.playSecondsCur.ToString());
                         //oo = GetDate(timeDVR).CompareTo(GetDate(struFileData.struStopTime));
                         //BeginInvoke(del, GetDate(timeDVR).ToString()+"      "+ GetDate(struFileData.struStopTime).ToString());
                         //(new Thread(() => SetReplay(-2, true))).Start();
 
                         //struFileCond.struStartTime-struFileData.struStopTime+kkl< 0
+
+                        if (data.playSecondsCur > ReplaySettings.maxFileTimePlay) data.playSecondsCur = data.playSecondsPre;
+                        if (data.playSecondsCur > ReplaySettings.maxFileTimePlay) data.playSecondsCur = 0;
 
                         //PlayM4_ResetSourceBuffer(nPort);
                         //PlayM4_ResetSourceBufFlag(nPort);
@@ -151,7 +155,7 @@ namespace TestHik
                 }
             }
         }
-        
+
 
 
         public void LoginResultCallBack(int lUserID, int dwResult, ref CHCNetSDK.NET_DVR_DEVICEINFO_V30 lpDeviceInfo, IntPtr pUser)
@@ -346,7 +350,7 @@ namespace TestHik
                 {
                     DateTime dtNow = DateTime.Now;
                     str += Environment.NewLine;
-                    str = string.Format("{0:00}:{1:00}:{2:00}.{3:000} ",dtNow.Hour, dtNow.Minute, dtNow.Second,dtNow.Millisecond) + str;
+                    str = string.Format("{0:00}:{1:00}:{2:00}.{3:000} ", dtNow.Hour, dtNow.Minute, dtNow.Second, dtNow.Millisecond) + str;
                     textBox2.AppendText(str);
                 }
             }

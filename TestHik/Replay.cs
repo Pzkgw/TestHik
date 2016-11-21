@@ -38,20 +38,16 @@ namespace TestHik
         int m_rep_setDays = 0;
         int m_rep_foundHandle = -5; // record file pentru
         //int m_repPath; // 1:play 2:stop 3:reverse 30: fast forward
-        const int bufferSize = 6 * 1024 * 1024;
-        uint m_repBuffSz = bufferSize; // buffer size
-        //byte[] m_repBuffb = new byte[bufferSize];
-        //IntPtr m_repBuff;
-        int m_repRecordHandle = -1;
+        //const int bufferSize = 6 * 1024 * 1024;// buffer size
 
-        bool m_repFastPlay, m_repBackwardsPlay;
+        bool m_repFastPlay;
 
         ReplayData data;
 
         bool imgBool; // Image loop return value
         bool imgLoop; // ImageLoopTrueOrFalse
         uint LPOutValue = 0; // PlayBackControl return value by ref        
-        
+
 
         bool m_repPlayOrPause;
 
@@ -123,11 +119,12 @@ namespace TestHik
             {
                 if (on)
                 {
-                    
+
                     //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
                     if (data != null)
                     {
                         data.achievement_PlaybackStarted = false;
+                        data.achievement_FirstFrameHasAppeared = false;
                         SetReplay(-1, false); // stop replay 
                         PlayM4_ResetSourceBuffer(m_repPlayerPort);
                         PlayM4_ResetSourceBufFlag(m_repPlayerPort);
@@ -143,7 +140,7 @@ namespace TestHik
                         GetReplayTimeInterval(m_rep_setDays, m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
 
                         data = new ReplayData();
-                        data.canal = canal;                        
+                        data.canal = canal;
                         data.type = 0;
                         data.timeStartA = GetDate(timeStart);
                         data.timeStartB = data.timeStartA;
@@ -168,7 +165,7 @@ namespace TestHik
                         default: data.type = 0; break;
                     }
 
-                    FindFiles(data);
+                    FindFiles(ref data);
 
                     pVodPara.struBeginTime = struFileCond.struStartTime;
                     pVodPara.struEndTime = struFileCond.struStopTime;
@@ -218,8 +215,9 @@ namespace TestHik
                 }
                 else
                 {
-                    // Stop any ongoing playback
-                    CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
+                    // Stop any running video
+                    if (data == null) CloseVideo();
+                    else CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
 
                     //BeginInvoke(del, "NET_DVR_StopPlayBack: " + m_repPlayerPort.ToString() + " Canal: " + canal.ToString());
 
@@ -234,6 +232,7 @@ namespace TestHik
 
                     if (canal > 0)
                     {
+                        data = null;
                         SetReplayCtrlsVisibility(false, true);
                         if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
                             pictureBox1.BackgroundImageLayout = ImageLayout.Center;
@@ -246,7 +245,7 @@ namespace TestHik
 
         private void ReplayCallBack(int lPlayHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr dwUser)
         {
-            uint dwErr = 0;
+
             switch (dwDataType)
             {
                 case CHCNetSDK.NET_DVR_SYSHEAD:
@@ -1067,11 +1066,10 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             }
         }
 
-        int deft;
         // DVR file in intervalul de timp, pentru canalul specificat 
-        private void FindFiles(ReplayData info)
+        private void FindFiles(ref ReplayData info)
         {
-            info.achievement_FileFound = false;
+            info.achievement_FileHasBeenFound = false;
 
             if (info.type == 1 &&
                 info.playSecondsCur > uint.MinValue && info.playSecondsCur < uint.MaxValue)
@@ -1087,7 +1085,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             struFileCond.struStopTime = timeStop;
             struFileCond.byDrawFrame = 0;
 
-            int ssdk = GetSeconds(struFileCond.struStartTime), ssdk1;
+            int t1 = GetSeconds(struFileCond.struStartTime), t2 = -1, t3 = -2;
             //UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(-16), ref struFileCond.struStartTime); // doar pt NET_DVR_FindFile_V40
 
             BeginInvoke(del, "DVRFileSearch_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
@@ -1098,14 +1096,16 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             //---------------------------------------
             //Find record file
             bool
-            keepTry = true, // loop de incercari
-            oneMoreTry = false; // in case of error, 1 more try from file start
+            tryLoop = true, // loop de incercari
+            oneMoreTry = false, // in case of error, 1 more try from file start
+            foundAtLeastOneFile = false;
             uint keepCount = 0;
-            int playSecDiff = 6; // diferenta de secunde la care incepe play
-            while (keepTry || oneMoreTry)
+            int playSecDiff = ReplaySettings.TimeIntervalUpdate.startValue; // diferenta de secunde la care incepe play
+            while (tryLoop || oneMoreTry)
             {
-                BeginInvoke(del, "keepTry:"+ playSecDiff.ToString());
-                deft = int.MaxValue;
+                //BeginInvoke(del, "keepTry:" + playSecDiff.ToString());
+                Thread.Sleep(1);
+                info.playTimeContinous = int.MaxValue;
 
                 if (oneMoreTry)
                 {
@@ -1127,7 +1127,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
                     {
                         CloseFileFind();
-                        keepTry = false;
+                        tryLoop = false;
                         oneMoreTry = true;
                     }
 
@@ -1149,71 +1149,81 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                         else
                         if (result == CHCNetSDK.NET_DVR_FILE_SUCCESS)
                         {
-                            ssdk1 = GetSeconds(struFileData.struStopTime);
-                            BeginInvoke(del, struFileData.sFileName +
-                                "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
-                            BeginInvoke(del, "ssdk: " + ssdk.ToString() + "ssdk1: " + ssdk1.ToString());
-                            //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
-
-                            if (ssdk <= ssdk1)
+                            t2 = GetSeconds(struFileData.struStopTime);
+                            if (t3 != t2)
                             {
-                                if ((ssdk + playSecDiff) < ssdk1)
-                                {
-                                    keepTry = false;
+                                t3 = t2;
+                                BeginInvoke(del, struFileData.sFileName +
+                                    "_FROM_ " + GetDate(struFileData.struStartTime).ToLongTimeString() + " _TO_ " + GetDate(struFileData.struStopTime).ToLongTimeString());
+                                BeginInvoke(del, "t1: " + t1.ToString() + " t2: " + t2.ToString());
+                                //BeginInvoke(del, GetSeconds(timeStart).ToString() + " _TO_ " + GetSeconds(struFileData.struStopTime).ToString());
 
-                                    info.fileName = struFileData.sFileName;
-                                    info.timeStartB = GetDate(struFileData.struStartTime);
-                                    info.achievement_FileFound = true;
-                                    CloseFileFind();
-                                }
-                                else
+                                if (t1 <= t2)
                                 {
-                                    if (ssdk == ssdk1)
+                                    foundAtLeastOneFile = true;
+                                    if ((t1 + playSecDiff) <= t2)
                                     {
-                                        BeginInvoke(del, "_ssdk TEST failed: " + struFileCond.struStartTime.dwSecond.ToString());
+                                        tryLoop = false;
 
-                                        UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(1), ref struFileCond.struStartTime);
-                                        UpDvrDate(GetDate(struFileData.struStartTime).AddSeconds(1), ref struFileData.struStartTime);
+                                        info.fileName = struFileData.sFileName;
+                                        info.timeStartB = GetDate(struFileData.struStartTime);
+                                        info.achievement_FileHasBeenFound = true;
+                                        CloseFileFind();
                                     }
+                                    else
+                                    {
+                                        if (playSecDiff <= 3)
+                                        {
+                                            BeginInvoke(del, "_ssdk TEST failed: " + struFileCond.struStartTime.dwSecond.ToString());
 
-                                    CloseFileFind();
-                                    result = -5; // one more try                                    
+                                            UpDvrDate(GetDate(struFileCond.struStartTime).AddSeconds(1), ref struFileCond.struStartTime);
+                                            UpDvrDate(GetDate(struFileData.struStartTime).AddSeconds(1), ref struFileData.struStartTime);
+                                        }
+
+                                        CloseFileFind();
+                                        result = -5; // try again
+                                    }
                                 }
                             }
                         }
-                        else//NET_DVR_FILE_NOFIND || NET_DVR_NOMOREFILE ||NET_DVR_FILE_EXCEPTION
+                        else // 
+                        if (result == CHCNetSDK.NET_DVR_FILE_NOFIND || result < 0)
+                        {
+                            tryLoop = false;
+                            CloseFileFind();
+                        }
+                        else //NET_DVR_NOMOREFILE ||NET_DVR_FILE_EXCEPTION
                         {
                             CloseFileFind();
-                            Thread.Sleep(1);
-                            result = -3; // one more try                            
+                            result = -3; // try again
                         }
 
                     } while (result >= 0 && (result == CHCNetSDK.NET_DVR_FILE_SUCCESS || result == CHCNetSDK.NET_DVR_ISFINDING));
 
                 }
 
-                if (keepTry)
+                if (tryLoop)
                 {
                     if (++keepCount == uint.MaxValue)
                     {
                         BeginInvoke(del, "FINAL de incercari");
                         if (!oneMoreTry)
                         {
-                            keepTry = false;
+                            tryLoop = false;
                             oneMoreTry = true;
                         }
                     }
                     else
                     {
-                        Thread.Sleep(1);
-                        if (keepCount % 7 == 0 && playSecDiff > 0) --playSecDiff;
+                        if (t3 != t2 && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
                     }
                 }
                 else
                 {
-                    // struFileData e cu o zi in viitor dar GetSeconds se uita doar la Time
-                    deft = GetSeconds(struFileData.struStopTime) - ssdk - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
-                                                                            //ssdk = GetSeconds(struFileCond.struStartTime)
+                    if (foundAtLeastOneFile)
+                        // struFileData e cu o zi in viitor dar GetSeconds se uita doar la Time
+                        info.playTimeContinous = GetSeconds(struFileData.struStopTime) - t1 - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
+                                                                              //ssdk = GetSeconds(struFileCond.struStartTime)
                 }
             }
 
