@@ -72,21 +72,17 @@ namespace TestHik
             t.dwSecond = t0.dwSecond;
         }
 
-        private bool GetReplayTimeInterval(int sDays, int sOre, int sMinute, ref CHCNetSDK.NET_DVR_TIME startTime, ref CHCNetSDK.NET_DVR_TIME stopTime)
+        private bool GetReplayTimeInterval(int sDays, int sOre, int sMinute, ref DateTime t1, ref DateTime t2)
         {
             if (TimeDVRUpdate())
             {
-                DateTime d0 = GetDate(timeDVR), d1 = GetDate(timeDVR);
-                d0 = d0.AddHours(sOre * -1);
-                d0 = d0.AddMinutes(sMinute * -1);
+                t1 = GetDate(timeDVR);
+                t2 = t1;
+                t1 = t1.AddHours(sOre * -1);
+                t1 = t1.AddMinutes(sMinute * -1);
 
-                //d1 = d1.AddMinutes(50);
-                //d1 = d1.AddSeconds(10);
-                //d1 = d1.AddMinutes(-2);
-                d1 = d1.AddDays(1);
+                t2 = t2.AddDays(1);
 
-                UpDvrDate(d0, ref startTime);
-                UpDvrDate(d1, ref stopTime);
                 return true;
             }
             return false;

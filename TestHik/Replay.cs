@@ -20,7 +20,7 @@ namespace TestHik
         private fDisplayCallBack_Hik m_rep_DisplayCallBack;
 
         //private DateTime timpDeReferinta; // UTC curent
-        private CHCNetSDK.NET_DVR_TIME timeDVR, timeStart, timeStop;
+        private CHCNetSDK.NET_DVR_TIME timeDVR;
         private IntPtr timePtr_DVR, m_User;
 
         //CHCNetSDK.NET_DVR_CERT_PARAM struCertParam;       
@@ -103,128 +103,109 @@ namespace TestHik
         /// <param name="on">: play :stop </param>
         private void SetReplay(int canal, bool on)
         {
-
+            if (on)
             {
-                if (on)
+                //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
+                if (data != null)
                 {
+                    data.achievement_PlaybackStarted = false;
+                    data.achievement_FirstFrameHasAppeared = false;
+                    SetReplay(-1, false); // stop replay 
+                    PlayM4_ResetSourceBuffer(m_repPlayerPort);
+                    PlayM4_ResetSourceBufFlag(m_repPlayerPort);
+                }
 
-                    //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
-                    if (data != null)
-                    {
-                        data.achievement_PlaybackStarted = false;
-                        data.achievement_FirstFrameHasAppeared = false;
-                        SetReplay(-1, false); // stop replay 
-                        PlayM4_ResetSourceBuffer(m_repPlayerPort);
-                        PlayM4_ResetSourceBufFlag(m_repPlayerPort);
-                    }
+                if (canal >= 0)
+                {
+                    //
+                    CloseVideo(); // stop real-play, do eet .. daca e nevoie
 
-                    if (canal >= 0)
-                    {
-                        //
-                        CloseVideo(); // stop real-play, do eet .. daca e nevoie
+                    SetReplayCtrlsVisibility(true, true);
 
-                        SetReplayCtrlsVisibility(true, true);
+                    data = new ReplayData();
+                    data.canal = canal;
+                    data.type = 0;
 
-                        GetReplayTimeInterval(m_rep_setDays, m_rep_setOre, m_rep_setMin, ref timeStart, ref timeStop);
+                    GetReplayTimeInterval(m_rep_setDays, m_rep_setOre, m_rep_setMin, ref data.timeA, ref data.timeB);
 
-                        data = new ReplayData();
-                        data.canal = canal;
-                        data.type = 0;
-                        data.timeStartA = GetDate(timeStart);
-                        data.timeStartB = data.timeStartA;
-                    }
+                    data.timeStartA = data.timeA;
+                    data.timeStartB = data.timeStartA;
+                }
 
-                    //if (TimeDVRUpdate()) UpDvrDate(GetDate(timeStop).AddDays(1), ref timeStop);
+                //if (TimeDVRUpdate()) UpDvrDate(GetDate(timeStop).AddDays(1), ref timeStop);
 
-                    CHCNetSDK.NET_DVR_VOD_PARA pVodPara;
-                    pVodPara = new CHCNetSDK.NET_DVR_VOD_PARA();
-                    pVodPara.struIDInfo = new CHCNetSDK.NET_DVR_STREAM_INFO();
-                    pVodPara.dwSize = (uint)Marshal.SizeOf(pVodPara);
-                    pVodPara.byDrawFrame = 0;
-                    pVodPara.hWnd = IntPtr.Zero; //
+                CHCNetSDK.NET_DVR_VOD_PARA pVodPara;
+                pVodPara = new CHCNetSDK.NET_DVR_VOD_PARA();
+                pVodPara.struIDInfo = new CHCNetSDK.NET_DVR_STREAM_INFO();
+                pVodPara.dwSize = (uint)Marshal.SizeOf(pVodPara);
+                pVodPara.byDrawFrame = 0;
+                pVodPara.hWnd = IntPtr.Zero; //
 
-                    pVodPara.struIDInfo.dwChannel = (uint)data.canal;
+                pVodPara.struIDInfo.dwChannel = (uint)data.canal;
 
-                    switch (canal)
-                    {// 0 - play, 1 - restart for next-file-continue, 2 - restart from begin
-                        case -2: data.type = 1; break;
-                        case -3: data.type = 2; break;
-                        default: data.type = 0; break;
-                    }
+                switch (canal)
+                {// 0 - play, 1 - restart for next-file-continue, 2 - restart from begin
+                    case -2: data.type = 1; break;
+                    case -3: data.type = 2; break;
+                    default: data.type = 0; break;
+                }
 
-                    FindFiles(ref data);
+                FindFiles(ref data);
 
-                    pVodPara.struBeginTime = timeStart;
-                    pVodPara.struEndTime = timeStop;
+                UpDvrDate(data.timeA, ref pVodPara.struBeginTime);
+                UpDvrDate(data.timeB, ref pVodPara.struEndTime);
 
-                    data.handle = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
-                    //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
-                    //pbb = CHCNetSDK.NET_DVR_PlayBackByName(m_lUserID, struFileData.sFileName, new IntPtr(m_lRealHandle));
+                data.handle = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
+                //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
+                //pbb = CHCNetSDK.NET_DVR_PlayBackByName(m_lUserID, struFileData.sFileName, new IntPtr(m_lRealHandle));
 
-                    if (data.handle < 0)
-                    {
-                        BeginInvoke(del, "FAILED ->  Replay DVR FROM_ " + GetDate(timeStart).ToString() + " _TO_ " + GetDate(timeStop).ToString());
-                        return;
-                    }
-                    else
-                    {
-                        /*
-                                            IntPtr pUser = new IntPtr();
-
-                                            CHCNetSDK.NET_DVR_PREVIEWINFO lpPreviewInfo = new CHCNetSDK.NET_DVR_PREVIEWINFO();
-
-                                            lpPreviewInfo.lChannel = Convert.ToUInt16(textBox_Ch.Text); //35; // channel number starting from 1 (pentru analogice)
-                                            lpPreviewInfo.dwStreamType = 1; // 0=mainstream, 1=sub-stream
-                                            lpPreviewInfo.dwLinkMode = 0; // 0-tcp, 1-udp, 2-multicast, 3-rtp, 4-rtp/rtps, 5-rstp/http
-                                            lpPreviewInfo.hPlayWnd = IntPtr.Zero;//pictureBox1.Handle;
-                                            lpPreviewInfo.bBlocked = 0; // 0-non-blocking stream, 1-blocking stream;
-                                            //lpPreviewInfo.dwDisplayBufNum = 5;
-
-                                            m_fRealDataCallBack = new CHCNetSDK.REALDATACALLBACK(RealDataCallBack);
-
-                                            m_lRealHandle = CHCNetSDK.NET_DVR_RealPlay_V40(m_lUserID, ref lpPreviewInfo, m_fRealDataCallBack, pUser);
-                        */
-                        bool playbackStart; // SetPlayDataCallBack return value
-                        playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(data.handle, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
-                        //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
-
-                        if (playbackStart)
-                        {
-                            m_User = new IntPtr(m_lUserID);
-                            playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(data.handle, m_rep_CallBack, m_User);
-
-                            data.achievement_PlaybackStarted = playbackStart;
-                        }
-
-                        //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
-                    }
-
+                if (data.handle < 0)
+                {
+                    BeginInvoke(del, "FAILED ->  Replay DVR");
+                    return;
                 }
                 else
                 {
-                    // Stop any running video
-                    if (data == null) CloseVideo();
-                    else CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
+                    bool playbackStart; // SetPlayDataCallBack return value
+                    playbackStart = CHCNetSDK.NET_DVR_PlayBackControl_V40(data.handle, CHCNetSDK.NET_DVR_PLAYSTART, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);
+                    //playbackStart &= CHCNetSDK.NET_DVR_PlayBackControl_V40(pbb, CHCNetSDK.NET_DVR_PLAYSTOPAUDIO, IntPtr.Zero, 0, IntPtr.Zero, ref LPOutValue);                    
 
-                    //BeginInvoke(del, "NET_DVR_StopPlayBack: " + m_repPlayerPort.ToString() + " Canal: " + canal.ToString());
-
-                    if (m_repPlayerPort >= 0)
+                    if (playbackStart)
                     {
-                        PlayM4_Stop(m_repPlayerPort);
+                        m_User = new IntPtr(m_lUserID);
+                        playbackStart &= CHCNetSDK.NET_DVR_SetPlayDataCallBack_V40(data.handle, m_rep_CallBack, m_User);
 
-                        PlayM4_CloseStream(m_repPlayerPort);
-                        PlayM4_FreePort(m_repPlayerPort);
-                        //if (canal != -1) m_repPlayerPort = -1;
+                        data.achievement_PlaybackStarted = playbackStart;
                     }
 
-                    if (canal > 0)
-                    {
-                        data = null;
-                        SetReplayCtrlsVisibility(false, true);
-                        if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
-                            pictureBox1.BackgroundImageLayout = ImageLayout.Center;
-                        pictureBox1.BackgroundImage = global::TestHik.Properties.Resources.CAVI_square;
-                    }
+                    //BeginInvoke(del, "NET_DVR_PlayBackControl_V40: " + playbackStart.ToString());
+                }
+
+            }
+            else
+            {
+                // Stop any running video
+                if (data == null) CloseVideo();
+                else CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
+
+                //BeginInvoke(del, "NET_DVR_StopPlayBack: " + m_repPlayerPort.ToString() + " Canal: " + canal.ToString());
+
+                if (m_repPlayerPort >= 0)
+                {
+                    PlayM4_Stop(m_repPlayerPort);
+
+                    PlayM4_CloseStream(m_repPlayerPort);
+                    PlayM4_FreePort(m_repPlayerPort);
+                    //if (canal != -1) m_repPlayerPort = -1;
+                }
+
+                if (canal > 0)
+                {
+                    data = null;
+                    SetReplayCtrlsVisibility(false, true);
+                    if (pictureBox1.BackgroundImageLayout != ImageLayout.Center)
+                        pictureBox1.BackgroundImageLayout = ImageLayout.Center;
+                    pictureBox1.BackgroundImage = global::TestHik.Properties.Resources.CAVI_square;
                 }
             }
         }
@@ -1057,10 +1038,15 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
         private void FindFiles(ref ReplayData info)
         {
             info.achievement_FileHasBeenFound = false;
+            CHCNetSDK.NET_DVR_TIME
+                timeStart = new TestHik.CHCNetSDK.NET_DVR_TIME(),
+                timeStop = new TestHik.CHCNetSDK.NET_DVR_TIME();
+            UpDvrDate(data.timeA, ref timeStart);
+            UpDvrDate(data.timeB, ref timeStop);
 
             if (info.type == 1 &&
                 info.playSecondsCur > uint.MinValue && info.playSecondsCur < uint.MaxValue)
-                UpDvrDate(GetDate(timeStart).AddSeconds(info.playSecondsCur), ref timeStart);
+                UpDvrDate(data.timeA.AddSeconds(info.playSecondsCur), ref timeStart);
 
             if (info.type == 2) // restart
             {
@@ -1230,8 +1216,8 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                         info.playTimeContinous -= (playSecDiff > 3) ? playSecDiff : 3; // min: 3, max: inf
                                                                                        // ssdk <= GetSeconds(struFileData.struStopTime)
 
-                        timeStart = struFileCond.struStartTime;
-                        timeStop = struFileCond.struStopTime;
+                        data.timeA = GetDate(struFileCond.struStartTime);
+                        data.timeB = GetDate(struFileCond.struStopTime);
                     }
                     else
                     {

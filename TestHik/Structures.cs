@@ -15,8 +15,10 @@ namespace TestHik
         public uint playSecondsCur = 0; // current played seconds value
 
         public string fileName;
-        public DateTime timeStartA; // timpul de start pentru tot intervalul
-        public DateTime timeStartB; // timpul de start al fisierului curent
+        public DateTime timeA, timeB; // intervalul de play
+        public DateTime timeStartA; // timpul de start pentru tot intervalul(1'st timeA)
+        public DateTime timeStartB; // timpul de start al fisierului curent        
+
         public int timeInSecondsB = -2; // timpul de stop(nu si data), in secunde
 
         public byte type; // 0 - play, 1 - restart for next-file-continue, 2 - restart from begin

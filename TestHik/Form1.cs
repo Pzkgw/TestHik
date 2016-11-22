@@ -132,7 +132,7 @@ namespace TestHik
                 {
                     data.playSecondsPre = data.playSecondsCur;
                     data.playSecondsCur = PlayM4_GetPlayedTime(nPort);
-                    if ((data.playTimeContinous - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + data.playTimeContinous.ToString());
+                    //if ((data.playTimeContinous - data.playSecondsCur) < 3) BeginInvoke(del, "a: " + data.playSecondsCur.ToString() + " b: " + data.playTimeContinous.ToString());
                     if ((data.playSecondsCur < uint.MaxValue) && ((data.playSecondsCur > ReplaySettings.maxFileTimePlay) || (data.playSecondsCur >= data.playTimeContinous))) // most time stop at kkl == deft
                     {
                         //4294967295
