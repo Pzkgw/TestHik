@@ -27,13 +27,15 @@ namespace TestHik
 
     struct ReplaySettings
     {
+        public const int maxFileFindLoops = 0x100;  // de cate ori de incearca gasirea fisierului pe interval
+        public const int maxFileTimePlay = 4199500; // valoarea maxima din teste pentru PlayM4_GetPlayedTime
+
         public struct TimeIntervalUpdate
         {
             public const int startValue = 7; // maximum start difference in second between wanted interval and DVR file stop time  
             public const int retryAfterFrames = 3; // after each retryAfterFrames, stop time receives interval update, a different retry
         }
 
-        public const int maxFileFindLoops = 0x100;  // de cate ori de incearca gasirea fisierului pe interval
-        public const int maxFileTimePlay = 4199500; // valoarea maxima din teste pentru PlayM4_GetPlayedTime
+
     }
 }

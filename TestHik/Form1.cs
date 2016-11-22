@@ -77,7 +77,7 @@ namespace TestHik
                  */
 
             //if(data.playSecondsCur != data.playSecondsPre)
-            if (data == null || (data != null && data.achievement_PlaybackStarted)) // null data e test pt playback
+            if (data == null || (data != null && data.achievement_FileHasBeenFound && data.achievement_PlaybackStarted)) // null data e test pt playback
             {
                 if (nType == 3 && (nSize > 0) && (nPort >= 0) && ((nWidth * nHeight * 3) == (nSize * 2)))
                 {

@@ -27,10 +27,6 @@ namespace TestHik
         //CHCNetSDK.NET_DVR_PLAYCOND pPlayCond; // reverse play cond
         //CHCNetSDK.NET_DVR_PLAYCOND pDownloadCond;
 
-
-        CHCNetSDK.NET_DVR_FINDDATA_V40 struFileData = new CHCNetSDK.NET_DVR_FINDDATA_V40();
-        CHCNetSDK.NET_DVR_FILECOND_V40 struFileCond = new CHCNetSDK.NET_DVR_FILECOND_V40();
-
         const uint m_rep_oreInMinus = 0; // diferenta de ore, daca exista
         int m_rep_canal = 39;
         int m_rep_setOre = 0; // inregistarea sa inceapa de acum minus m_rep_setOre, m_rep_setMin
@@ -68,14 +64,6 @@ namespace TestHik
 
             m_rep_CallBack = new CHCNetSDK.PlayDataCallBack_V40(ReplayCallBack);
             m_rep_DisplayCallBack = new fDisplayCallBack_Hik(DisplayCallBack_Hik);
-
-            struFileCond.dwFileType = 0xFF;
-            struFileCond.dwIsLocked = 0xFF;
-            struFileCond.dwUseCardNo = 0;
-
-
-
-
 
 
             timePtr_DVR = MarshalToPointer(timeDVR);
@@ -152,9 +140,8 @@ namespace TestHik
                     pVodPara = new CHCNetSDK.NET_DVR_VOD_PARA();
                     pVodPara.struIDInfo = new CHCNetSDK.NET_DVR_STREAM_INFO();
                     pVodPara.dwSize = (uint)Marshal.SizeOf(pVodPara);
-                    //pVodPara.byDrawFrame = 0;
-                    pVodPara.hWnd = IntPtr.Zero; // poate e schimbata la ref din NET_DVR_PlayBackByTime_V40, dar sigur cu 0 intra in iterare
-
+                    pVodPara.byDrawFrame = 0;
+                    pVodPara.hWnd = IntPtr.Zero; //
 
                     pVodPara.struIDInfo.dwChannel = (uint)data.canal;
 
@@ -167,8 +154,8 @@ namespace TestHik
 
                     FindFiles(ref data);
 
-                    pVodPara.struBeginTime = struFileCond.struStartTime;
-                    pVodPara.struEndTime = struFileCond.struStopTime;
+                    pVodPara.struBeginTime = timeStart;
+                    pVodPara.struEndTime = timeStop;
 
                     data.handle = CHCNetSDK.NET_DVR_PlayBackByTime_V40(m_lUserID, ref pVodPara);
                     //pbb = CHCNetSDK.NET_DVR_PlayBackByTime(m_lUserID, canal, ref startTime, ref stopTime, new IntPtr(m_lRealHandle));
@@ -1080,6 +1067,11 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                 UpDvrDate(info.timeStartA, ref timeStart);
             }
 
+
+            CHCNetSDK.NET_DVR_FILECOND_V40 struFileCond = new CHCNetSDK.NET_DVR_FILECOND_V40();
+            struFileCond.dwFileType = 0xFF;
+            struFileCond.dwIsLocked = 0xFF;
+            struFileCond.dwUseCardNo = 0;
             struFileCond.lChannel = (uint)info.canal; // !!!!!!!!!!!!!!! cum spanac merge asta pe -1 ??????
             struFileCond.struStartTime = timeStart;
             struFileCond.struStopTime = timeStop;
@@ -1090,6 +1082,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
 
             BeginInvoke(del, "DVRFileSearch_" + GetDate(timeStart).ToLongTimeString() + "  TO  " + GetDate(timeStop).ToLongTimeString());
 
+            CHCNetSDK.NET_DVR_FINDDATA_V40 struFileData = new CHCNetSDK.NET_DVR_FINDDATA_V40();
             struFileData.struStartTime = timeStart;
             struFileData.struStopTime = timeStop;
 
@@ -1211,7 +1204,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                 {
                     if (++keepCount > ReplaySettings.maxFileFindLoops)
                     {
-                        BeginInvoke(del, "FINAL de incercari");
+                        BeginInvoke(del, "One retry ongoing ...");
                         if (!oneMoreTry)
                         {
                             tryLoop = false;
@@ -1224,22 +1217,35 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                 {
                     if (foundAtLeastOneFile)
                     {
-                        // struFileData e cu o zi in viitor dar GetSeconds se uita doar la Time
-                        info.playTimeContinous = t2 - t1 - 3;// false keepTry daca ssdk <= GetSeconds(struFileData.struStopTime)
-
+                        // regula (play start time >= inceputul fisierului) nu e respectata
                         int startDiff = GetSeconds(struFileData.struStartTime) - t1;
-                        if (startDiff > 0) // regula (play start time >= inceputul fisierului) nu e respectata
+                        if (startDiff > 0)
                         {
                             UpDvrDate(struFileData.struStartTime, ref struFileCond.struStartTime);
+                            t1 = GetSeconds(struFileCond.struStartTime);
                         }
+
+                        // struFileData.struStopTime e cu o zi in viitor dar GetSeconds se uita doar la Time
+                        info.playTimeContinous = t2 - t1; // t2 - t1 mit added updates
+                        info.playTimeContinous -= (playSecDiff > 3) ? playSecDiff : 3; // min: 3, max: inf
+                                                                                       // ssdk <= GetSeconds(struFileData.struStopTime)
+
+                        timeStart = struFileCond.struStartTime;
+                        timeStop = struFileCond.struStopTime;
                     }
                     else
                     {
-                        BeginInvoke(del, "E gaura ... nu am gasit nimic !");
+                        if (!oneMoreTry)
+                        {
+                            tryLoop = false;
+                            keepCount = 0; //]
+                            oneMoreTry = true;
+                        }
+                        else
+                            BeginInvoke(del, "E gaura ... nu am gasit nimic !");
                     }
                 }
             }
-
         }
 
         private void CloseFileFind()
@@ -1251,8 +1257,6 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                     //BeginInvoke(del, "FAIL at NET_DVR_FindClose_V30");
                 }
         }
-
-
 
         private void SetReplayCtrlsVisibility(bool v, bool pause)
         {
@@ -1274,8 +1278,6 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                 btnRepPause.Text = "Pause";
             }
         }
-
-
 
 
     }
