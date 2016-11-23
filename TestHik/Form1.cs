@@ -715,7 +715,7 @@ namespace TestHik
 
         private void button6_Click(object sender, EventArgs e)
         {
-            SetReplay(m_rep_canal, false);
+            SetReplay(-7, false); // btn close click -> stop replay
             CloseVideo();
         }
 

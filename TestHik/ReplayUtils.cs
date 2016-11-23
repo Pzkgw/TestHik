@@ -78,6 +78,7 @@ namespace TestHik
             {
                 t1 = GetDate(timeDVR);
                 t2 = t1;
+                t1 = t1.AddDays(sDays * -1);
                 t1 = t1.AddHours(sOre * -1);
                 t1 = t1.AddMinutes(sMinute * -1);
 
@@ -90,7 +91,7 @@ namespace TestHik
 
         private int GetSeconds(CHCNetSDK.NET_DVR_TIME t)
         {
-            return (int)t.dwHour * 3600 + (int)t.dwMinute * 60 + (int)t.dwSecond;
+            return (int)(t.dwHour * 3600 + t.dwMinute * 60 + t.dwSecond);
         }
 
     }

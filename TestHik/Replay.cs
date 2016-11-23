@@ -108,9 +108,10 @@ namespace TestHik
                 //if (canal == -2) PlayM4_Pause(m_repPlayerPort, 0);
                 if (data != null)
                 {
-                    data.achievement_PlaybackStarted = false;
-                    data.achievement_FirstFrameHasAppeared = false;
                     SetReplay(-1, false); // stop replay 
+                    data.achievement_PlaybackStarted = false;
+                    data.achievement_FileHasBeenFound = false;
+                    data.achievement_FirstFrameHasAppeared = false;
                     PlayM4_ResetSourceBuffer(m_repPlayerPort);
                     PlayM4_ResetSourceBufFlag(m_repPlayerPort);
                 }
@@ -128,8 +129,8 @@ namespace TestHik
 
                     GetReplayTimeInterval(m_rep_setDays, m_rep_setOre, m_rep_setMin, ref data.timeA, ref data.timeB);
 
-                    data.timeStartA = data.timeA;
-                    data.timeStartB = data.timeStartA;
+                    data.timeStartA = data.timeA.AddYears(0);
+                    data.timeStartB = data.timeA.AddYears(0);
                 }
 
                 //if (TimeDVRUpdate()) UpDvrDate(GetDate(timeStop).AddDays(1), ref timeStop);
@@ -184,10 +185,6 @@ namespace TestHik
             }
             else
             {
-                // Stop any running video
-                if (data == null) CloseVideo();
-                else CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
-
                 //BeginInvoke(del, "NET_DVR_StopPlayBack: " + m_repPlayerPort.ToString() + " Canal: " + canal.ToString());
 
                 if (m_repPlayerPort >= 0)
@@ -198,6 +195,10 @@ namespace TestHik
                     PlayM4_FreePort(m_repPlayerPort);
                     //if (canal != -1) m_repPlayerPort = -1;
                 }
+
+                // Stop any running video
+                if (data == null) CloseVideo();
+                else CHCNetSDK.NET_DVR_StopPlayBack(data.handle);
 
                 if (canal > 0)
                 {
@@ -213,107 +214,108 @@ namespace TestHik
 
         private void ReplayCallBack(int lPlayHandle, uint dwDataType, IntPtr pBuffer, uint dwBufSize, IntPtr dwUser)
         {
-
-            switch (dwDataType)
+            if (data == null || (data != null && data.achievement_FileHasBeenFound && data.achievement_PlaybackStarted)) // null data e test pt playback
             {
-                case CHCNetSDK.NET_DVR_SYSHEAD:
-                    if (m_repPlayerPort != -1)
-                    {
-                        PlayM4_Stop(m_repPlayerPort);
-                        PlayM4_CloseStream(m_repPlayerPort);
-                        PlayM4_FreePort(m_repPlayerPort);
-                        m_repPlayerPort = -1;
-                    }
-
-                    if (!PlayM4_GetPort(ref m_repPlayerPort))
-                    {
-                        //dwErr = PlayCtrl.PlayM4_GetLastError(m_lPort);
-                        BeginInvoke(del, "PlayM4_GetPort Failed!");
-                    }
-
-                    if (dwBufSize > 0)
-                    {
-                        if (!PlayM4_SetStreamOpenMode(m_repPlayerPort, 0))  //设置实时流播放模式
-                        {
-                            BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
-                            break;
-                        }
-
-                        //if (!PlayM4_SetFileRefCallBack(m_repPlayerPort, ferb, IntPtr.Zero))  //设置实时流播放模式
-                        {
-                            // BeginInvoke(del, "PlayM4_SetFileRefCallBack Failed!");
-                            //break;
-                        }
-
-                        // if (!PlayM4_SetFileEndCallback(m_repPlayerPort, fepb, IntPtr.Zero))  //设置实时流播放模式
-                        {
-                            //BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
-                            //break;
-                        }
-
-                        if (!PlayM4_OpenStream(m_repPlayerPort, ref pBuffer, dwBufSize, 8 * 1024 * 1024)) //打开流接口
-                        {
-                            BeginInvoke(del, "PlayM4_OpenStream Failed!"); break;
-                        }
-
-                        /*
-                        struFileCond.lChannel = pVodPara.struIDInfo.dwChannel;
-                        struFileCond.struStartTime = timeStart;
-                        struFileCond.struStopTime = timeStop;
-
-                        m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
-
-                        CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
-
-
-                        if (!PlayM4_OpenFile(m_repPlayerPort, struFileData.sFileName+ ".mp4"))
-                        {
-                            BeginInvoke(del, "PlayM4_OpenFile Failed!");
-                            break;
-                        }
-
-                        if (!PlayM4_SetDisplayBuf(m_repPlayerPort, 15))
-                        {
-                            dwErr = PlayM4_GetLastError(m_repPlayerPort);
-                            BeginInvoke(del, "PlayM4_SetDisplayBuf Failed!");
-                            //MessageBox.Show(dwErr.ToString());
-                            //break;
-                        }*/
-
-
-                        if (!PlayM4_Play(m_repPlayerPort, IntPtr.Zero))// m_EagleEyePanel.Handle)) //播放开始
-                        {
-                            BeginInvoke(del, "PlayM4_Play Failed!");
-                            break;
-                        }
-
-                        if (!PlayM4_SetDisplayCallBack(m_repPlayerPort, m_rep_DisplayCallBack))
+                switch (dwDataType)
+                {
+                    case CHCNetSDK.NET_DVR_SYSHEAD:
+                        if (m_repPlayerPort != -1)
                         {
                             PlayM4_Stop(m_repPlayerPort);
                             PlayM4_CloseStream(m_repPlayerPort);
                             PlayM4_FreePort(m_repPlayerPort);
                             m_repPlayerPort = -1;
-                            BeginInvoke(del, "PlayM4_SetDisplayCallBack Failed!");
                         }
 
-
-                    }
-                    break;
-                default:
-                    //case CHCNetSDK.NET_DVR_STREAMDATA:
-                    if (dwBufSize > 0 && m_repPlayerPort >= 0)
-                    {
-                        /*
-                        unsafe
+                        if (!PlayM4_GetPort(ref m_repPlayerPort))
                         {
-                            PlayM4_InputData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
-                            //BeginInvoke(del, 
-                            //PlayM4_InputVideoData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
-                        }*/
+                            //dwErr = PlayCtrl.PlayM4_GetLastError(m_lPort);
+                            BeginInvoke(del, "PlayM4_GetPort Failed!");
+                        }
 
-                        unsafe
+                        if (dwBufSize > 0)
                         {
-                            byte* pb = (byte*)pBuffer.ToPointer();/*
+                            if (!PlayM4_SetStreamOpenMode(m_repPlayerPort, 0))  //设置实时流播放模式
+                            {
+                                BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
+                                break;
+                            }
+
+                            //if (!PlayM4_SetFileRefCallBack(m_repPlayerPort, ferb, IntPtr.Zero))  //设置实时流播放模式
+                            {
+                                // BeginInvoke(del, "PlayM4_SetFileRefCallBack Failed!");
+                                //break;
+                            }
+
+                            // if (!PlayM4_SetFileEndCallback(m_repPlayerPort, fepb, IntPtr.Zero))  //设置实时流播放模式
+                            {
+                                //BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
+                                //break;
+                            }
+
+                            if (!PlayM4_OpenStream(m_repPlayerPort, ref pBuffer, dwBufSize, 8 * 1024 * 1024)) //打开流接口
+                            {
+                                BeginInvoke(del, "PlayM4_OpenStream Failed!"); break;
+                            }
+
+                            /*
+                            struFileCond.lChannel = pVodPara.struIDInfo.dwChannel;
+                            struFileCond.struStartTime = timeStart;
+                            struFileCond.struStopTime = timeStop;
+
+                            m_rep_foundHandle = CHCNetSDK.NET_DVR_FindFile_V40(m_lUserID, ref struFileCond);
+
+                            CHCNetSDK.NET_DVR_FindNextFile_V40(m_rep_foundHandle, ref struFileData);
+
+
+                            if (!PlayM4_OpenFile(m_repPlayerPort, struFileData.sFileName+ ".mp4"))
+                            {
+                                BeginInvoke(del, "PlayM4_OpenFile Failed!");
+                                break;
+                            }
+
+                            if (!PlayM4_SetDisplayBuf(m_repPlayerPort, 15))
+                            {
+                                dwErr = PlayM4_GetLastError(m_repPlayerPort);
+                                BeginInvoke(del, "PlayM4_SetDisplayBuf Failed!");
+                                //MessageBox.Show(dwErr.ToString());
+                                //break;
+                            }*/
+
+
+                            if (!PlayM4_Play(m_repPlayerPort, IntPtr.Zero))// m_EagleEyePanel.Handle)) //播放开始
+                            {
+                                BeginInvoke(del, "PlayM4_Play Failed!");
+                                break;
+                            }
+
+                            if (!PlayM4_SetDisplayCallBack(m_repPlayerPort, m_rep_DisplayCallBack))
+                            {
+                                PlayM4_Stop(m_repPlayerPort);
+                                PlayM4_CloseStream(m_repPlayerPort);
+                                PlayM4_FreePort(m_repPlayerPort);
+                                m_repPlayerPort = -1;
+                                BeginInvoke(del, "PlayM4_SetDisplayCallBack Failed!");
+                            }
+
+
+                        }
+                        break;
+                    default:
+                        //case CHCNetSDK.NET_DVR_STREAMDATA:
+                        if (dwBufSize > 0 && m_repPlayerPort >= 0)
+                        {
+                            /*
+                            unsafe
+                            {
+                                PlayM4_InputData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
+                                //BeginInvoke(del, 
+                                //PlayM4_InputVideoData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
+                            }*/
+
+                            unsafe
+                            {
+                                byte* pb = (byte*)pBuffer.ToPointer();/*
                             for (int i = 0; i < int.MaxValue; i++)
                             {
                                 if (!PlayM4_InputData(m_repPlayerPort, pb, dwBufSize))
@@ -335,183 +337,184 @@ namespace TestHik
                                 }
                             }*/
 
-                            {
                                 {
-                                    for (int i = 0; i < 999; i++)
                                     {
-                                        // Into the stream decoding data Input the stream data to decode
-                                        if (!PlayM4_InputData(m_repPlayerPort, pb, dwBufSize))
-                                            Thread.Sleep(2);
-                                        else
-                                            break;
+                                        for (int i = 0; i < 999; i++)
+                                        {
+                                            // Into the stream decoding data Input the stream data to decode
+                                            if (!PlayM4_InputData(m_repPlayerPort, pb, dwBufSize))
+                                                Thread.Sleep(2);
+                                            else
+                                                break;
+                                        }
                                     }
                                 }
                             }
+
                         }
 
-                    }
 
 
-
-                    break;
-            }
-
+                        break;
+                }
 
 
 
 
 
 
-            /*
-                        if (CheckEagleEyeStream())//小鹰眼码流的特殊处理  -- 这个客户不用特殊关注
-                        {
-                            if (!PlayM4_SetDecodeEngineEx(m_repPlayerPort, HARD_DECODE_ENGINE))
+
+                /*
+                            if (CheckEagleEyeStream())//小鹰眼码流的特殊处理  -- 这个客户不用特殊关注
                             {
-                                break;
-                            }
-
-                            PLAYM4SRMODELMODE struParam = new PLAYM4SRMODELMODE();
-                            struParam.emTextureMode = (uint)PLAYM4SRTEXTUREMODE.PLAYM4_TEXTURE_DOUBLE;
-                            struParam.ulDisplayType = PLAYM4_MODEL_SOLID;
-                            struParam.nTransformMode = 0;
-                            struParam.emModelType = (uint)PLAYM4SRMODELTYPE.PLAYM4_MODELTYPE_EAGLE_EYE;
-                            struParam.bModelMode = true; // true是碗装，false是块状
-
-                            int dwSize = Marshal.SizeOf(struParam);
-                            IntPtr ptrDeviceCfg = Marshal.AllocHGlobal(dwSize);
-                            Marshal.StructureToPtr(struParam, ptrDeviceCfg, false);
-
-                            if (!PlayM4_SR_SetConfig(m_repPlayerPort, CFG_DISPLAY_MODEL_MODE, ptrDeviceCfg))
-                            {
-                                Marshal.FreeHGlobal(ptrDeviceCfg);
-                                break;
-                            }
-                            Marshal.FreeHGlobal(ptrDeviceCfg);
-                        }*/
-
-
-
-
-
-
-            /*
-
-            if (!PlayM4_InputData(m_repPlayerPort, ref pBuffer, dwBufSize))
-            {
-                dwErr = PlayM4_GetLastError(m_repPlayerPort);
-                return;
-            }
-        */
-
-
-
-
-
-
-
-
-
-
-
-            //Monitor.Enter(buffer);
-            // BeginInvoke(del, "ReplayCallBack!");
-            //BeginInvoke((Action)(() => { byte[] bInfo = new byte[dwBufSize]; }));
-
-
-            /*
-            switch (dwDataType)
-            {
-                case CHCNetSDK.NET_DVR_SYSHEAD:
-
-                    if (dwBufSize > 0)
-                    {
-                        int port = -1;
-                        if (PlayM4_GetPort(ref port))
-                        {
-                            if (port >= 0)
-                            {
-                                //#define STREAME_REALTIME 0 #define STREAME_FILE 1
-                                if (PlayM4_SetStreamOpenMode(port, 0)) //STREAME_REALTIME == 0
+                                if (!PlayM4_SetDecodeEngineEx(m_repPlayerPort, HARD_DECODE_ENGINE))
                                 {
-                                    IntPtr byFileHeadBuf = new IntPtr();
-                                    //if (PlayM4_OpenStreamEx(port, ref byFileHeadBuf, (uint)dwBufSize, (uint)m_repBuffSz))
-                                    if (PlayM4_OpenStream(port, ref byFileHeadBuf, dwBufSize, m_repBuffSz))
+                                    break;
+                                }
+
+                                PLAYM4SRMODELMODE struParam = new PLAYM4SRMODELMODE();
+                                struParam.emTextureMode = (uint)PLAYM4SRTEXTUREMODE.PLAYM4_TEXTURE_DOUBLE;
+                                struParam.ulDisplayType = PLAYM4_MODEL_SOLID;
+                                struParam.nTransformMode = 0;
+                                struParam.emModelType = (uint)PLAYM4SRMODELTYPE.PLAYM4_MODELTYPE_EAGLE_EYE;
+                                struParam.bModelMode = true; // true是碗装，false是块状
+
+                                int dwSize = Marshal.SizeOf(struParam);
+                                IntPtr ptrDeviceCfg = Marshal.AllocHGlobal(dwSize);
+                                Marshal.StructureToPtr(struParam, ptrDeviceCfg, false);
+
+                                if (!PlayM4_SR_SetConfig(m_repPlayerPort, CFG_DISPLAY_MODEL_MODE, ptrDeviceCfg))
+                                {
+                                    Marshal.FreeHGlobal(ptrDeviceCfg);
+                                    break;
+                                }
+                                Marshal.FreeHGlobal(ptrDeviceCfg);
+                            }*/
+
+
+
+
+
+
+                /*
+
+                if (!PlayM4_InputData(m_repPlayerPort, ref pBuffer, dwBufSize))
+                {
+                    dwErr = PlayM4_GetLastError(m_repPlayerPort);
+                    return;
+                }
+            */
+
+
+
+
+
+
+
+
+
+
+
+                //Monitor.Enter(buffer);
+                // BeginInvoke(del, "ReplayCallBack!");
+                //BeginInvoke((Action)(() => { byte[] bInfo = new byte[dwBufSize]; }));
+
+
+                /*
+                switch (dwDataType)
+                {
+                    case CHCNetSDK.NET_DVR_SYSHEAD:
+
+                        if (dwBufSize > 0)
+                        {
+                            int port = -1;
+                            if (PlayM4_GetPort(ref port))
+                            {
+                                if (port >= 0)
+                                {
+                                    //#define STREAME_REALTIME 0 #define STREAME_FILE 1
+                                    if (PlayM4_SetStreamOpenMode(port, 0)) //STREAME_REALTIME == 0
                                     {
-                                        if (PlayM4_Play(port, IntPtr.Zero))  //Start play
+                                        IntPtr byFileHeadBuf = new IntPtr();
+                                        //if (PlayM4_OpenStreamEx(port, ref byFileHeadBuf, (uint)dwBufSize, (uint)m_repBuffSz))
+                                        if (PlayM4_OpenStream(port, ref byFileHeadBuf, dwBufSize, m_repBuffSz))
                                         {
-                                            if (PlayM4_SetDisplayCallBack(port, m_rep_DisplayCallBack) == 0)
+                                            if (PlayM4_Play(port, IntPtr.Zero))  //Start play
                                             {
-                                                PlayM4_Stop(port);
+                                                if (PlayM4_SetDisplayCallBack(port, m_rep_DisplayCallBack) == 0)
+                                                {
+                                                    PlayM4_Stop(port);
+                                                    PlayM4_CloseStream(port);
+                                                    PlayM4_FreePort(port);
+                                                    port = -1;
+                                                    BeginInvoke(del, "PlayM4_SetDisplayCallBack Failed!");
+                                                }
+                                            }
+                                            else
+                                            {
                                                 PlayM4_CloseStream(port);
                                                 PlayM4_FreePort(port);
                                                 port = -1;
-                                                BeginInvoke(del, "PlayM4_SetDisplayCallBack Failed!");
+                                                BeginInvoke(del, "PlayM4_Play Failed!");
                                             }
                                         }
                                         else
                                         {
-                                            PlayM4_CloseStream(port);
                                             PlayM4_FreePort(port);
                                             port = -1;
-                                            BeginInvoke(del, "PlayM4_Play Failed!");
+                                            BeginInvoke(del, "PlayM4_OpenStream Failed!");
                                         }
                                     }
                                     else
                                     {
                                         PlayM4_FreePort(port);
                                         port = -1;
-                                        BeginInvoke(del, "PlayM4_OpenStream Failed!");
+                                        BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
                                     }
                                 }
-                                else
-                                {
-                                    PlayM4_FreePort(port);
-                                    port = -1;
-                                    BeginInvoke(del, "PlayM4_SetStreamOpenMode Failed!");
-                                }
                             }
+                            else
+                            {
+                                BeginInvoke(del, "PlayM4_GetPort Failed!");
+                            }
+
+                            //if (port > 0)
+                            m_repPlayerPort = port;
                         }
-                        else
+
+                        BeginInvoke(del, "NET_DVR_SYSHEAD: System head data");
+                        break; // 1 System head data
+
+                    case CHCNetSDK.NET_DVR_STREAMDATA:
+                        if (dwBufSize > 0 && m_repPlayerPort >= 0)
                         {
-                            BeginInvoke(del, "PlayM4_GetPort Failed!");
+                            unsafe
+                            {
+                                PlayM4_InputData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
+                                //BeginInvoke(del, 
+                                //PlayM4_InputVideoData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
+                            }
+                            //if (bSavingStream) CHCNetSDK.NET_DVR_PlayBackSaveData(pbb, sFilePathjj);
+
+                            //BeginInvoke(del, CHCNetSDK.NET_DVR_GetPlayBackPos(pbb).ToString());
+
+
                         }
+                        break; // 2 Stream data(compound stream or only video stream )
 
-                        //if (port > 0)
-                        m_repPlayerPort = port;
-                    }
-
-                    BeginInvoke(del, "NET_DVR_SYSHEAD: System head data");
-                    break; // 1 System head data
-
-                case CHCNetSDK.NET_DVR_STREAMDATA:
-                    if (dwBufSize > 0 && m_repPlayerPort >= 0)
-                    {
-                        unsafe
+                    case CHCNetSDK.NET_DVR_CHANGE_FORWARD:
                         {
-                            PlayM4_InputData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
-                            //BeginInvoke(del, 
-                            //PlayM4_InputVideoData(m_repPlayerPort, (byte*)pBuffer.ToPointer(), dwBufSize);
+                            BeginInvoke(del, "NET_DVR_CHANGE_FORWARD: Stream changed to forward play");
                         }
-                        //if (bSavingStream) CHCNetSDK.NET_DVR_PlayBackSaveData(pbb, sFilePathjj);
+                        break; // 10 Stream changed to forward play
 
-                        //BeginInvoke(del, CHCNetSDK.NET_DVR_GetPlayBackPos(pbb).ToString());
-
-
-                    }
-                    break; // 2 Stream data(compound stream or only video stream )
-
-                case CHCNetSDK.NET_DVR_CHANGE_FORWARD:
-                    {
-                        BeginInvoke(del, "NET_DVR_CHANGE_FORWARD: Stream changed to forward play");
-                    }
-                    break; // 10 Stream changed to forward play
-
-                case CHCNetSDK.NET_DVR_CHANGE_REVERSE:
-                    {
-                        BeginInvoke(del, "NET_DVR_CHANGE_REVERSE: Stream changed to reverse play");
-                    }
-                    break; // 11 Stream changed to forward play
-            }*/
+                    case CHCNetSDK.NET_DVR_CHANGE_REVERSE:
+                        {
+                            BeginInvoke(del, "NET_DVR_CHANGE_REVERSE: Stream changed to reverse play");
+                        }
+                        break; // 11 Stream changed to forward play
+                }*/
+            }
         }
 
 
@@ -1037,21 +1040,26 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
         // DVR file in intervalul de timp, pentru canalul specificat 
         private void FindFiles(ref ReplayData info)
         {
-            info.achievement_FileHasBeenFound = false;
+
             CHCNetSDK.NET_DVR_TIME
-                timeStart = new TestHik.CHCNetSDK.NET_DVR_TIME(),
-                timeStop = new TestHik.CHCNetSDK.NET_DVR_TIME();
-            UpDvrDate(data.timeA, ref timeStart);
-            UpDvrDate(data.timeB, ref timeStop);
+                timeStart = new CHCNetSDK.NET_DVR_TIME(),
+                timeStop = new CHCNetSDK.NET_DVR_TIME();
 
-            if (info.type == 1 &&
-                info.playSecondsCur > uint.MinValue && info.playSecondsCur < uint.MaxValue)
-                UpDvrDate(data.timeA.AddSeconds(info.playSecondsCur), ref timeStart);
 
-            if (info.type == 2) // restart
+            switch (info.type)
             {
-                UpDvrDate(info.timeStartA, ref timeStart);
+                case 1: // re-init after file end
+                    if (info.playSecondsCur > uint.MinValue && info.playSecondsCur < uint.MaxValue)
+                        UpDvrDate(info.timeA.AddSeconds(info.playSecondsCur), ref timeStart);
+                    break;
+                case 2:// restart
+                    UpDvrDate(info.timeStartA, ref timeStart);
+                    break;
+                default:
+                    UpDvrDate(info.timeA, ref timeStart);
+                    break;
             }
+            UpDvrDate(info.timeB, ref timeStop);
 
 
             CHCNetSDK.NET_DVR_FILECOND_V40 struFileCond = new CHCNetSDK.NET_DVR_FILECOND_V40();
@@ -1084,7 +1092,6 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
             while (tryLoop || oneMoreTry)
             {
                 //BeginInvoke(del, "keepTry:" + playSecDiff.ToString());
-                //Thread.Sleep(1);
                 info.playTimeContinous = int.MaxValue;
 
                 if (oneMoreTry)
@@ -1132,7 +1139,7 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                             if (oneFileChangeOccured && keepCount % ReplaySettings.TimeIntervalUpdate.retryAfterFrames == 0 && playSecDiff > 0) --playSecDiff;
                             t2 = GetSeconds(struFileData.struStopTime);
 
-                            if (info.timeInSecondsB != t2)
+                            if ((info.type != 2 && info.timeInSecondsB != t2) || (info.type == 2))
                             {
                                 info.timeInSecondsB = t2;
                                 oneFileChangeOccured = true;
@@ -1216,8 +1223,8 @@ BeginInvoke(del, oo.ToString() + LPOutValue.ToString() + oop.ToString());*/
                         info.playTimeContinous -= (playSecDiff > 3) ? playSecDiff : 3; // min: 3, max: inf
                                                                                        // ssdk <= GetSeconds(struFileData.struStopTime)
 
-                        data.timeA = GetDate(struFileCond.struStartTime);
-                        data.timeB = GetDate(struFileCond.struStopTime);
+                        info.timeA = GetDate(struFileCond.struStartTime);
+                        info.timeB = GetDate(struFileCond.struStopTime);
                     }
                     else
                     {
