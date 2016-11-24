@@ -38,7 +38,7 @@ namespace TestHik
         public string sDebugPath = string.Empty;
         public readonly object debugLock = new object(); // lock pt acces unic la resursa de scriere in fisierul de salvare streaming
 
-        public bool bSavingStream = false;
+        public bool bSavingStream = false, bSavingStreamStarted = false;
 
 
 
@@ -123,7 +123,8 @@ namespace TestHik
                         pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
                     pictureBox1.BackgroundImage = bitmap;
 
-                    data.achievement_FirstFrameHasAppeared = true;
+                    if (data != null)
+                        data.achievement_FirstFrameHasAppeared = true;
                 }
 
 
@@ -154,8 +155,24 @@ namespace TestHik
                     }
                 }
             }
-        }
 
+            if (bSavingStream)
+            {
+                if (!bSavingStreamStarted)
+                {
+                    CHCNetSDK.NET_DVR_SaveRealData_V30(m_lRealHandle, 2, sFilePathjj);
+                    bSavingStreamStarted = true;
+                }
+            }
+            else
+            {
+                if (bSavingStreamStarted)
+                {
+                    CHCNetSDK.NET_DVR_StopSaveRealData(m_lRealHandle);
+                    bSavingStreamStarted = false;
+                }
+            }
+        }
 
 
         public void LoginResultCallBack(int lUserID, int dwResult, ref CHCNetSDK.NET_DVR_DEVICEINFO_V30 lpDeviceInfo, IntPtr pUser)
